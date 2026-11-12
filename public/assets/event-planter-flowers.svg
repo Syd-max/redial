@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 216 113" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <path id="leaf" d="M0 0C6-10 18-13 25-10 21-3 12 3 0 0Z"/>
+    <path id="petals" d="M-3-6C-14-7-15-16-8-18c5-2 8 2 9 6 2-9 11-10 14-4 3 5-1 9-7 11 8-2 14 3 11 9-2 5-9 6-14 1 3 8-1 14-7 13-6-1-8-6-4-13-6 5-14 4-16-2-2-6 6-11 19-9Z"/>
+  </defs>
+  <g stroke="#74774f" stroke-width="1.5">
+    <path d="M75 112C75 88 49 62 37 52M111 112c-4-31 0-58 10-81m16 81c8-25 24-44 41-57m-77 57c-1-18-13-29-21-35m70 35c9-15 30-26 44-28"/>
+    <g fill="#a3a37c" fill-opacity=".72" stroke-width="1">
+      <use href="#leaf" transform="translate(59 79) rotate(-151) scale(.85)"/>
+      <use href="#leaf" transform="translate(67 91) rotate(-67) scale(.66)"/>
+      <use href="#leaf" transform="translate(111 76) rotate(-145)"/>
+      <use href="#leaf" transform="translate(112 89) rotate(-25) scale(.88)"/>
+      <use href="#leaf" transform="translate(115 59) rotate(-35) scale(.84)"/>
+      <use href="#leaf" transform="translate(154 81) rotate(-104) scale(.79)"/>
+      <use href="#leaf" transform="translate(151 89) rotate(9) scale(.83)"/>
+      <use href="#leaf" transform="translate(164 99) rotate(20) scale(.73)"/>
+    </g>
+  </g>
+  <g transform="translate(35 49) rotate(-13) scale(.76)" fill="#d2aa9c" stroke="#9c6c62" stroke-width="1.25">
+    <use href="#petals"/><circle r="3.9" fill="#ac8152" stroke="none"/>
+  </g>
+  <g transform="translate(122 26) rotate(17)" fill="#f4e2ba" stroke="#a98a5d" stroke-width="1.1">
+    <use href="#petals"/><circle r="4" fill="#bc8c4a" stroke="none"/>
+  </g>
+  <g transform="translate(180 52) rotate(11) scale(.84)" fill="#d7afa5" stroke="#9c6c62" stroke-width="1.2">
+    <use href="#petals"/><circle r="4" fill="#aa7e50" stroke="none"/>
+  </g>
+  <path d="M82 78c-8 1-13-7-7-11 6-4 11 4 7 11Zm111 7c1-7 8-10 11-5s-4 9-11 5Z" fill="#ddc69e" stroke="#a88b5d"/>
+</svg>

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+/assets-original/
+.env*
+!.env.example
+.vercel/
+test-results/
+.redial.sql
+.env.local

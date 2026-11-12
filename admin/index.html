@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#f8f1e4" />
+    <title>REDIAL 5.0</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-redial.png" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/admin.css" />
+  </head>
+  <body>
+    <header class="admin-header">
+      <div class="admin-shell">
+        <a class="brand admin-brand" href="/" aria-label="REDIAL beranda">
+          <span class="brand-mark">
+            <img src="/assets/logo-redial.png" width="344" height="293" alt="" />
+          </span>
+          <span class="brand-mark brand-mark-hima">
+            <img src="/assets/logo-hima.webp" width="180" height="217" alt="" />
+          </span>
+          <span class="brand-mark brand-mark-tactlink">
+            <img src="/assets/logo-tactlink.png" width="492" height="454" alt="" />
+          </span>
+        </a>
+        <div class="admin-header-actions">
+          <a class="back-link" href="/">Kembali ke website</a>
+          <button class="back-link admin-logout" id="logout" type="button" hidden>Keluar</button>
+        </div>
+      </div>
+    </header>
+    <main class="admin-shell">
+      <div id="admin-startup" class="admin-startup-skeleton form-card skeleton-form-card" role="status">
+        <span class="sr-only">Memeriksa sesi admin…</span>
+        <div class="skeleton-block" aria-hidden="true"></div>
+        <div class="skeleton-block" aria-hidden="true"></div>
+        <div class="skeleton-block" aria-hidden="true"></div>
+      </div>
+      <section
+        id="admin-login"
+        class="admin-login"
+        aria-labelledby="login-title"
+        hidden
+      >
+        <div class="admin-login-art">
+          <img class="admin-login-vine" src="/assets/hero-vine-left.webp" width="640" height="726" alt="" />
+          <img class="admin-login-lantern" src="/assets/lantern.webp" width="455" height="677" alt="" />
+          <img class="admin-login-wordmark" src="/assets/wordmark.webp" width="984" height="419" alt="REDIAL 5.0" />
+        </div>
+        <form id="login-form" class="form-card">
+          <h1 id="login-title">Masuk sebagai admin</h1>
+          <div class="field">
+            <label for="admin-email">Email</label>
+            <input
+              id="admin-email"
+              type="email"
+              name="email"
+              autocomplete="username"
+              maxlength="254"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="admin-password">Kata sandi</label>
+            <input
+              id="admin-password"
+              type="password"
+              name="password"
+              autocomplete="current-password"
+              maxlength="1024"
+              required
+            />
+          </div>
+          <button class="button form-submit" type="submit">Masuk</button>
+          <p class="form-status" id="login-status" role="status"></p>
+        </form>
+      </section>
+      <section id="admin-dashboard" aria-labelledby="dashboard-title" hidden>
+        <div class="admin-heading">
+          <h1 id="dashboard-title">Data REDIAL 5.0</h1>
+          <button class="admin-control" id="refresh" type="button">
+            Muat ulang
+          </button>
+        </div>
+        <form class="admin-search" id="search-form" role="search">
+          <label class="sr-only" for="admin-search"
+            >Cari nama atau instansi</label
+          >
+          <svg class="admin-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="m16 16 4 4" />
+          </svg>
+          <input
+            id="admin-search"
+            name="search"
+            type="search"
+            placeholder="Cari nama atau instansi"
+            maxlength="120"
+          />
+          <button class="admin-control" type="submit">Cari</button>
+        </form>
+        <p class="admin-note" id="dashboard-status" role="status"></p>
+        <div class="admin-table-wrap" id="table-wrap" hidden>
+          <table class="admin-table" aria-label="Daftar peserta">
+            <thead>
+              <tr>
+                <th scope="col">Nama</th>
+                <th scope="col">Instansi</th>
+                <th scope="col">Waktu daftar</th>
+                <th scope="col"><span class="sr-only">Aksi</span></th>
+              </tr>
+            </thead>
+            <tbody id="registration-rows"></tbody>
+          </table>
+        </div>
+        <div class="admin-pagination" id="pagination" hidden>
+          <button class="admin-control" id="previous" type="button">
+            Sebelumnya
+          </button>
+          <span id="page-number"></span>
+          <button class="admin-control" id="next" type="button">
+            Berikutnya
+          </button>
+        </div>
+      </section>
+    </main>
+    <dialog class="admin-dialog" id="detail-dialog" aria-labelledby="detail-title">
+      <div class="admin-detail-header">
+        <h2 id="detail-title">Detail registrasi</h2>
+        <button class="admin-control" id="close-detail" type="button" autofocus>Tutup</button>
+      </div>
+      <dl class="admin-detail-fields">
+        <div><dt>Nama</dt><dd data-detail="name"></dd></div>
+        <div><dt>Instansi</dt><dd data-detail="institution"></dd></div>
+        <div><dt>Jenis kelamin</dt><dd data-detail="gender"></dd></div>
+        <div><dt>Paket sponsor</dt><dd data-detail="sponsor"></dd></div>
+        <div><dt>Waktu daftar</dt><dd data-detail="time"></dd></div>
+      </dl>
+      <section class="admin-detail-files" aria-labelledby="detail-files-title">
+        <h3 id="detail-files-title">Berkas</h3>
+        <ul class="admin-file-links" id="detail-files"></ul>
+      </section>
+    </dialog>
+    <dialog class="admin-dialog admin-logout-dialog" id="logout-dialog" aria-labelledby="logout-title">
+      <h2 id="logout-title">Keluar dari akun admin?</h2>
+      <p class="form-status" id="logout-status" role="status"></p>
+      <div class="admin-logout-actions">
+        <button class="back-link" id="logout-cancel" type="button" autofocus>Batal</button>
+        <button class="back-link admin-logout" id="logout-confirm" type="button">Ya, keluar</button>
+      </div>
+    </dialog>
+    <script type="module" src="/src/admin.js"></script>
+  </body>
+</html>

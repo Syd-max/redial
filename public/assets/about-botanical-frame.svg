@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <g id="leaf">
+      <path d="M0 0C3-7 10-10 18-8 17-2 10 3 0 0Z" fill="#849168" stroke="#65724f" stroke-width=".55"/>
+      <path d="M1-.3c5-.4 9-2.1 14-5.6" fill="none" stroke="#596747" stroke-width=".65" stroke-linecap="round"/>
+    </g>
+    <g id="small-leaf">
+      <path d="M0 0C2-5 6-8 12-7 12-2 6 2 0 0Z" fill="#a0a678" stroke="#75805b" stroke-width=".55"/>
+      <path d="M1 0c3-1 5-2.5 8-5" fill="none" stroke="#66734d" stroke-width=".55" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <g id="vine-top">
+    <path d="M4 29C34 48 59 35 88 19S156-2 188 10 235 44 279 34 325 10 365 9 413 4 445 15 475 41 514 29 562 11 594 22" fill="none" stroke="#6c7951" stroke-width="1.6" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <path d="M84 22q13-13 29-14m75 2q11 6 15 17m126-7q13-12 25-16m87 9q13-4 26 3m58 9q10-11 24-13" fill="none" stroke="#7f8b62" stroke-width="1" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <use href="#leaf" transform="translate(99 13) rotate(-19)"/>
+    <use href="#small-leaf" transform="translate(115 8) rotate(154)"/>
+    <use href="#small-leaf" transform="translate(200 22) rotate(104)"/>
+    <use href="#leaf" transform="translate(340 12) rotate(-31)"/>
+    <use href="#small-leaf" transform="translate(353 4) rotate(160)"/>
+    <use href="#leaf" transform="translate(454 14) rotate(11)"/>
+    <use href="#small-leaf" transform="translate(541 16) rotate(-22)"/>
+  </g>
+
+  <g id="vine-bottom">
+    <path d="M5 20c27 12 57 7 87-5 29-12 56-9 84 3 28 13 42 19 70 10 27-9 43-20 72-13 30 7 37 22 68 19 28-2 40-18 64-20 26-1 46 15 69 18 24 3 49-11 75-14" fill="none" stroke="#6f7c52" stroke-width="1.65" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <path d="M91 15q15-10 29-8m52 9q13 10 25 11m84-8q12-10 24-10m104 18q8-9 22-15m81 18q14 6 26 3" fill="none" stroke="#7f8b62" stroke-width="1" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <use href="#small-leaf" transform="translate(105 8) rotate(-27)"/>
+    <use href="#leaf" transform="translate(187 24) rotate(24)"/>
+    <use href="#small-leaf" transform="translate(296 12) rotate(-29)"/>
+    <use href="#leaf" transform="translate(419 20) rotate(-22)"/>
+    <use href="#small-leaf" transform="translate(535 32) rotate(17)"/>
+  </g>
+
+  <g id="vine-left">
+    <path d="M20 3C8 34 12 62 22 85s15 37 6 60c-9 22-20 34-15 63 4 23 17 43 14 70s-19 44-19 68c0 27 22 37 21 61-2 24-15 37-17 58-3 27 5 54 12 91" fill="none" stroke="#6d7a51" stroke-width="1.6" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <path d="M19 76Q9 65 5 50m19 103q12-7 14-20m-24 85q-8-10-9-21m20 93q11-5 14-18m-26 62q-8 12-8 24m21 31q10 4 13 17m-23 41q-9 6-12 17" fill="none" stroke="#7f8b62" stroke-width="1" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <use href="#leaf" transform="translate(9 63) rotate(-107)"/>
+    <use href="#small-leaf" transform="translate(32 144) rotate(-57)"/>
+    <use href="#small-leaf" transform="translate(10 209) rotate(-112)"/>
+    <use href="#leaf" transform="translate(29 284) rotate(-47)"/>
+    <use href="#small-leaf" transform="translate(7 342) rotate(112)"/>
+    <use href="#leaf" transform="translate(32 395) rotate(62)"/>
+    <use href="#small-leaf" transform="translate(11 451) rotate(128)"/>
+  </g>
+
+  <g id="vine-right">
+    <path d="M20 4c16 26 15 47 2 72-13 24-15 43-1 66 13 22 17 47 3 72-11 21-18 38-11 65 6 25 25 44 19 71s-22 38-20 64c2 20 14 33 14 54-1 30-15 54-3 88" fill="none" stroke="#6c7951" stroke-width="1.6" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <path d="M29 58q12-7 12-20m-25 90q-8-9-10-21m24 53q10 5 12 19m-26 54q-8 9-10 22m20 49q12 3 14 17m-19 61q-10 4-14 14m19 56q11 10 13 22m-20 41q-8 7-11 18" fill="none" stroke="#7f8b62" stroke-width="1" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <use href="#small-leaf" transform="translate(35 51) rotate(-55)"/>
+    <use href="#leaf" transform="translate(13 123) rotate(-112)"/>
+    <use href="#small-leaf" transform="translate(36 169) rotate(61)"/>
+    <use href="#leaf" transform="translate(11 242) rotate(116)"/>
+    <use href="#small-leaf" transform="translate(33 312) rotate(46)"/>
+    <use href="#leaf" transform="translate(15 386) rotate(141)"/>
+    <use href="#small-leaf" transform="translate(31 460) rotate(63)"/>
+    <use href="#leaf" transform="translate(16 521) rotate(125)"/>
+  </g>
+
+  <g id="flower-open" stroke="#a8656a" stroke-width="1.05" stroke-linejoin="round">
+    <path d="M31 32C21 26 18 15 24 9c5-6 14-3 16 4 1 7-3 14-9 19Z" fill="#cf9795"/>
+    <path d="M32 32c1-12 10-19 18-15 7 3 7 12 1 16-5 4-13 3-19-1Z" fill="#d5a3a0"/>
+    <path d="M32 32c12-3 22 3 21 11-1 9-11 11-16 4-4-4-5-10-5-15Z" fill="#c88c8d"/>
+    <path d="M32 32c7 9 6 21-1 24-8 4-15-3-13-10 1-6 7-11 14-14Z" fill="#d4a19a"/>
+    <path d="M31 32C22 43 10 42 7 34c-3-7 4-13 11-11 6 1 10 5 13 9Z" fill="#d8a7a1"/>
+    <path d="M30 29q-6-6-5-13m10 13q5-6 11-7m-9 14q7 2 9 6m-16-4q-4 6-4 11m0-15q-7 2-12-1" fill="none" stroke="#aa6c70" stroke-width=".9" stroke-linecap="round"/>
+    <circle cx="32" cy="33" r="4.8" fill="#e7c89d" stroke="#a37855"/>
+    <path d="M30.5 31.8h.1m2.8-.5h.1m.6 2.5h.1m-2.6 1h.1" fill="none" stroke="#926947" stroke-linecap="round"/>
+  </g>
+
+  <g id="flower-cup">
+    <path d="M32 51c1-9 0-15-4-22m3 16q9-8 18-8m-19 7q-6-7-16-7" fill="none" stroke="#718059" stroke-width="1.7" stroke-linecap="round"/>
+    <use href="#small-leaf" transform="translate(33 43) rotate(-16)"/>
+    <use href="#leaf" transform="translate(26 43) rotate(176)"/>
+    <path d="M30 36C21 34 16 26 18 20c2-5 8-5 13 2-1-8 3-13 8-12 6 1 6 7 2 14 6-6 13-5 14 0 1 7-10 15-19 14Z" fill="#d0a09a" stroke="#a8656a" stroke-width="1.1" stroke-linejoin="round"/>
+    <path d="M31 35c-5-4-7-8-7-11m10 11q2-10 6-15m-4 16q7-3 12-8" fill="none" stroke="#a86970" stroke-width=".9" stroke-linecap="round"/>
+    <path d="M30 37q1-5 5-7 3 1 3 5-4 3-8 2Z" fill="#e4c198" stroke="#aa7f5d" stroke-width=".65"/>
+  </g>
+</svg>
