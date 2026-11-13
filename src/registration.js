@@ -1,5 +1,5 @@
-import { sponsorPackages } from "./sponsor-packages.js";
 import { maxProofBytes } from "./payment-proof.js";
+import { normalizeEmail, normalizePhone } from "./registration-contact.js";
 
 const form = document.querySelector("#registration-form");
 const heading = document.querySelector(".registration-heading");
@@ -21,11 +21,11 @@ const video = document.querySelector(".tactlink-video");
 const videoChoices = [...document.querySelectorAll(".tactlink-videos button")];
 const qrInput = form.elements.tactlinkQr;
 const qrError = document.querySelector("#tactlink-qr-error");
-const uploads = [form.elements.paymentProof, qrInput];
+const { phone, email } = form.elements;
 let step = 1;
 
-for (const name of sponsorPackages) {
-  form.elements.sponsorPackage.add(new Option(name, name));
+for (const input of [phone, email]) {
+  input.addEventListener("input", () => input.setCustomValidity(""));
 }
 
 function syncOtherInstitution() {
@@ -38,29 +38,6 @@ function syncOtherInstitution() {
 institution.addEventListener("change", syncOtherInstitution);
 window.addEventListener("pageshow", syncOtherInstitution);
 syncOtherInstitution();
-
-const archive = form.querySelector(".sponsor-archive");
-const archiveContent = form.querySelector("#sponsor-archive-content");
-const archiveAction = archive.querySelector(".sponsor-archive-action");
-const stamp = archive.querySelector(".sponsor-stamp");
-
-archiveContent.hidden = true;
-archive.hidden = false;
-archive.addEventListener("click", () => {
-  const open = archiveContent.hidden;
-  archiveContent.hidden = !open;
-  archive.setAttribute("aria-expanded", String(open));
-  archiveAction.textContent = open ? "Tutup detail" : "Lihat detail";
-});
-
-for (const details of archiveContent.querySelectorAll("details")) {
-  details.addEventListener("toggle", () => {
-    if (!details.open) return;
-    const [name, price] = details.querySelector("summary").children;
-    stamp.firstElementChild.textContent = name.textContent;
-    stamp.lastElementChild.textContent = price?.textContent ?? "";
-  });
-}
 
 function showVideo(choice) {
   for (const button of videoChoices) button.setAttribute("aria-pressed", String(button === choice));
@@ -94,6 +71,12 @@ function showStep(number, focus = true) {
 }
 
 function validateStep(number) {
+  if (number === 1) {
+    phone.setCustomValidity(phone.value && !normalizePhone(phone.value)
+      ? "Masukkan nomor telepon yang valid (8–15 digit)." : "");
+    email.setCustomValidity(email.value && !normalizeEmail(email.value)
+      ? "Masukkan alamat email yang valid, misalnya nama@email.com." : "");
+  }
   const panel = number === 1 ? dataStep : tactlinkStep;
   const invalid = panel.querySelector("input:invalid, select:invalid");
   if (!invalid) return true;
@@ -144,35 +127,32 @@ async function scanQrImage(file) {
   }
 }
 
-for (const input of uploads) {
-  const error = input === qrInput ? qrError : document.querySelector("#proof-error");
-  input.addEventListener("change", async () => {
-    const file = input.files[0];
-    const tooLarge = file?.size > maxProofBytes;
-    showUploadError(input, error, tooLarge ? "Ukuran file melebihi 2 MB. Pilih file yang lebih kecil." : "");
-    if (input !== qrInput || !file || tooLarge) return;
+qrInput.addEventListener("change", async () => {
+  const file = qrInput.files[0];
+  const tooLarge = file?.size > maxProofBytes;
+  showUploadError(qrInput, qrError, tooLarge ? "Ukuran file melebihi 2 MB. Pilih file yang lebih kecil." : "");
+  if (!file || tooLarge) return;
 
-    if (file.type && !["image/jpeg", "image/png"].includes(file.type)) {
-      showUploadError(input, error, "Pilih gambar QR dalam format JPG atau PNG.");
-      return;
-    }
+  if (file.type && !["image/jpeg", "image/png"].includes(file.type)) {
+    showUploadError(qrInput, qrError, "Pilih gambar QR dalam format JPG atau PNG.");
+    return;
+  }
 
-    const checking = "Sedang memeriksa QR…";
-    input.setCustomValidity(checking);
-    error.textContent = checking;
-    let message = "";
-    try {
-      if (!await scanQrImage(file)) message = "QR tidak terbaca. Pilih foto yang menampilkan QR dengan jelas.";
-    } catch {
-      message = "Gambar QR tidak bisa diperiksa. Pilih ulang gambar JPG atau PNG.";
-    }
-    if (input.files[0] === file) showUploadError(input, error, message);
-  });
-}
+  const checking = "Sedang memeriksa QR…";
+  qrInput.setCustomValidity(checking);
+  qrError.textContent = checking;
+  let message = "";
+  try {
+    if (!await scanQrImage(file)) message = "QR tidak terbaca. Pilih foto yang menampilkan QR dengan jelas.";
+  } catch {
+    message = "Gambar QR tidak bisa diperiksa. Pilih ulang gambar JPG atau PNG.";
+  }
+  if (qrInput.files[0] === file) showUploadError(qrInput, qrError, message);
+});
 
 let requestId = crypto.randomUUID();
 let lastFields = "";
-let lastFiles = [];
+let lastQrFile;
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -187,17 +167,18 @@ form.addEventListener("submit", async (event) => {
     name: form.elements.name.value.trim(),
     gender: form.elements.gender.value,
     institution: institution.value === "lainnya" ? otherInstitution.value.trim() : institution.value,
-    sponsorPackage: form.elements.sponsorPackage.value,
+    phone: normalizePhone(phone.value),
+    email: normalizeEmail(email.value),
   };
   const currentFields = JSON.stringify(fields);
-  const currentFiles = uploads.map(input => input.files[0]);
-  if (lastFields && (currentFields !== lastFields || currentFiles.some((file, i) => file !== lastFiles[i])))
+  const qrFile = qrInput.files[0];
+  if (lastFields && (currentFields !== lastFields || qrFile !== lastQrFile))
     requestId = crypto.randomUUID();
   lastFields = currentFields;
-  lastFiles = currentFiles;
+  lastQrFile = qrFile;
   const payload = new FormData();
   for (const [key, value] of Object.entries({ ...fields, requestId })) payload.set(key, value);
-  uploads.forEach((input, i) => payload.set(input.name, currentFiles[i]));
+  payload.set(qrInput.name, qrFile);
 
   submit.disabled = true;
   back.disabled = true;
@@ -224,7 +205,7 @@ form.addEventListener("submit", async (event) => {
       );
     status.textContent = "";
     form.reset();
-    lastFiles = [];
+    lastQrFile = undefined;
     video.removeAttribute("src");
     heading.hidden = true;
     form.hidden = true;

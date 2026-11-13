@@ -21,7 +21,7 @@
   width: clamp(32px, 8vw, 38px);
 }
 .admin-header-actions,
-.admin-logout-actions {
+.admin-confirm-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -31,19 +31,21 @@
   margin-inline-start: auto;
 }
 .admin-header-actions .back-link,
-.admin-logout-actions .back-link {
+.admin-confirm-actions .back-link {
   margin: 0;
 }
-.back-link.admin-logout {
+.back-link.admin-logout,
+.back-link.admin-danger-button {
   border-color: var(--red);
   background: var(--red);
   color: #fffaf1;
 }
-.back-link.admin-logout:hover {
+.back-link.admin-logout:hover,
+.back-link.admin-danger-button:hover {
   border-color: #6f1c29;
   background: #6f1c29;
 }
-.admin-logout-actions button:disabled {
+.admin-confirm-actions button:disabled {
   opacity: 0.6;
   cursor: wait;
 }
@@ -278,6 +280,19 @@
 .admin-row-detail {
   text-align: right;
 }
+.admin-row-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.admin-delete-button {
+  border-radius: 999px;
+  color: var(--red);
+}
+.admin-delete-button:hover {
+  background: #f7e8e2;
+}
 .admin-detail-button {
   border-color: #dcc8af;
   border-radius: 999px;
@@ -298,7 +313,7 @@
   font-size: 0.9rem;
   list-style: none;
 }
-.admin-proof-link {
+.admin-detail-link {
   width: fit-content;
   color: var(--red);
   font-weight: 600;
@@ -326,18 +341,22 @@
 .admin-dialog::backdrop {
   background: #2e211c66;
 }
-.admin-logout-dialog {
+.admin-confirm-dialog {
   width: min(420px, calc(100% - 28px));
 }
-.admin-logout-dialog h2 {
+.admin-confirm-dialog h2 {
   font-size: clamp(1.75rem, 5vw, 2rem);
   line-height: 1.12;
 }
-.admin-logout-dialog .form-status:empty {
+.admin-confirm-dialog .form-status:empty {
   display: none;
 }
-.admin-logout-actions {
+.admin-confirm-actions {
   margin-top: 22px;
+}
+#delete-description {
+  margin-top: 12px;
+  overflow-wrap: anywhere;
 }
 .admin-detail-header {
   display: flex;

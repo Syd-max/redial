@@ -132,9 +132,10 @@
       </div>
       <dl class="admin-detail-fields">
         <div><dt>Nama</dt><dd data-detail="name"></dd></div>
-        <div><dt>Instansi</dt><dd data-detail="institution"></dd></div>
         <div><dt>Jenis kelamin</dt><dd data-detail="gender"></dd></div>
-        <div><dt>Paket sponsor</dt><dd data-detail="sponsor"></dd></div>
+        <div><dt>Instansi</dt><dd data-detail="institution"></dd></div>
+        <div><dt>Nomor telepon</dt><dd data-detail="phone"></dd></div>
+        <div><dt>Email</dt><dd data-detail="email"></dd></div>
         <div><dt>Waktu daftar</dt><dd data-detail="time"></dd></div>
       </dl>
       <section class="admin-detail-files" aria-labelledby="detail-files-title">
@@ -142,10 +143,19 @@
         <ul class="admin-file-links" id="detail-files"></ul>
       </section>
     </dialog>
-    <dialog class="admin-dialog admin-logout-dialog" id="logout-dialog" aria-labelledby="logout-title">
+    <dialog class="admin-dialog admin-confirm-dialog" id="delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-description">
+      <h2 id="delete-title">Hapus data registrasi?</h2>
+      <p id="delete-description">Data <strong id="delete-name"></strong> dan berkas yang terkait akan dihapus permanen.</p>
+      <p class="form-status" id="delete-status" role="status"></p>
+      <div class="admin-confirm-actions">
+        <button class="back-link" id="delete-cancel" type="button" autofocus>Batal</button>
+        <button class="back-link admin-danger-button" id="delete-confirm" type="button">Ya, hapus</button>
+      </div>
+    </dialog>
+    <dialog class="admin-dialog admin-confirm-dialog" id="logout-dialog" aria-labelledby="logout-title">
       <h2 id="logout-title">Keluar dari akun admin?</h2>
       <p class="form-status" id="logout-status" role="status"></p>
-      <div class="admin-logout-actions">
+      <div class="admin-confirm-actions">
         <button class="back-link" id="logout-cancel" type="button" autofocus>Batal</button>
         <button class="back-link admin-logout" id="logout-confirm" type="button">Ya, keluar</button>
       </div>

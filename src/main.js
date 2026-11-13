@@ -1,5 +1,6 @@
 import "lenis/dist/lenis.css";
 import "./countdown.js";
+import "./intro-audio.js";
 import { content } from "./content.js";
 
 const menu = document.querySelector(".menu-toggle");
@@ -84,12 +85,13 @@ document.querySelector(".about-details-button").addEventListener("click", () => 
 });
 
 if (content.videos.length) {
-  const videos = content.videos.map(({ id, title, provider = "youtube", thumbnailUrl, mediaUrl }) => {
+  const videos = content.videos.map(({ id, title, provider = "youtube", thumbnailUrl, mediaUrl, kind }) => {
     if (provider === "drive") {
       const fileUrl = `https://drive.google.com/file/d/${id}`;
       return {
         title,
         provider,
+        kind,
         mediaUrl,
         thumbnailUrl: thumbnailUrl ?? `https://drive.google.com/thumbnail?id=${id}&sz=w480`,
         embedUrl: `${fileUrl}/preview`,
@@ -106,6 +108,7 @@ if (content.videos.length) {
   const stage = carousel.querySelector(".video-stage");
   const poster = carousel.querySelector(".video-poster");
   const thumbnail = poster.querySelector("img");
+  const playBadge = poster.querySelector(".video-play");
   const cardTitle = poster.querySelector(".video-card-title");
   const controls = carousel.querySelector(".video-controls");
   const position = carousel.querySelector(".video-position");
@@ -131,7 +134,9 @@ if (content.videos.length) {
     thumbnail.src = video.thumbnailUrl;
     poster.dataset.provider = video.provider;
     cardTitle.textContent = video.title;
-    poster.setAttribute("aria-label", `Putar ${video.title}`);
+    const isPhoto = video.kind === "photo";
+    playBadge.hidden = isPhoto;
+    poster.setAttribute("aria-label", `${isPhoto ? "Buka" : "Putar"} ${video.title}`);
     position.textContent = `${current + 1} / ${videoCount}`;
     previous.disabled = current === 0;
     next.disabled = current === videoCount - 1;
@@ -213,6 +218,19 @@ if (content.videos.length) {
   showVideo();
   carousel.hidden = false;
 }
+
+const throwbackCover = document.querySelector(".throwback-cover");
+throwbackCover.addEventListener("click", () => {
+  const player = document.createElement("iframe");
+  player.title = "After Movie REDIAL 4.0";
+  player.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+  player.allowFullscreen = true;
+  player.referrerPolicy = "strict-origin-when-cross-origin";
+  player.src = "https://www.youtube-nocookie.com/embed/R4qcoEbA3uQ?autoplay=1&playsinline=1";
+  throwbackCover.replaceWith(player);
+  player.focus({ preventScroll: true });
+}, { once: true });
+
 document.querySelector("#donation-qr").src = content.donationQr;
 document.querySelector(".donation-card a").href = content.donationQr;
 const partners = document.querySelector("#partners");

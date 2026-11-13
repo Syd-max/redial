@@ -5,5 +5,4 @@ dist/
 !.env.example
 .vercel/
 test-results/
-.redial.sql
 .env.local

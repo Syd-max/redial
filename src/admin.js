@@ -1,3 +1,5 @@
+import { normalizeEmail } from "./registration-contact.js";
+
 const startup = document.querySelector("#admin-startup");
 const login = document.querySelector("#admin-login");
 const dashboard = document.querySelector("#admin-dashboard");
@@ -7,6 +9,11 @@ const detailDialog = document.querySelector("#detail-dialog");
 const detailFields = detailDialog.querySelectorAll("[data-detail]");
 const detailFiles = document.querySelector("#detail-files");
 const closeDetail = document.querySelector("#close-detail");
+const deleteDialog = document.querySelector("#delete-dialog");
+const deleteName = document.querySelector("#delete-name");
+const deleteCancel = document.querySelector("#delete-cancel");
+const deleteConfirm = document.querySelector("#delete-confirm");
+const deleteStatus = document.querySelector("#delete-status");
 const loginStatus = document.querySelector("#login-status");
 const dashboardStatus = document.querySelector("#dashboard-status");
 const logout = document.querySelector("#logout");
@@ -31,6 +38,7 @@ const dateFormat = new Intl.DateTimeFormat("id-ID", {
 let page = 1;
 let search = "";
 let reading;
+let pendingDelete;
 
 async function request(method, { body, query, signal } = {}) {
   const response = await fetch("/api/admin" + (query ? "?" + query : ""), {
@@ -50,6 +58,7 @@ async function request(method, { body, query, signal } = {}) {
 function showLogin(message = "") {
   reading?.abort();
   if (detailDialog.open) detailDialog.close();
+  if (deleteDialog.open) deleteDialog.close();
   if (logoutDialog.open) logoutDialog.close();
   startup.hidden = true;
   login.hidden = false;
@@ -81,33 +90,38 @@ function registrationTime(entry) {
 }
 
 function showDetail(entry) {
+  const email = normalizeEmail(entry.email);
   const values = {
     name: entry.nama,
     institution: entry.instansi,
     gender: entry.jenis_kelamin === "laki-laki" ? "Laki-laki" : "Perempuan",
-    sponsor: entry.paket_sponsor ?? "Belum dipilih",
+    phone: entry.nomor_telepon || "Belum tersedia",
+    email: email ?? "Belum tersedia",
     time: registrationTime(entry),
   };
   for (const field of detailFields) field.textContent = values[field.dataset.detail];
+  if (email) {
+    const link = document.createElement("a");
+    const [local, domain] = email.split("@");
+    link.className = "admin-detail-link";
+    link.href = "mailto:" + encodeURIComponent(local) + "@" + domain;
+    link.textContent = email;
+    detailDialog.querySelector('[data-detail="email"]').replaceChildren(link);
+  }
 
   detailFiles.replaceChildren();
-  for (const [mime, file, label] of [
-    [entry.bukti_transfer_mime, "payment", "Bukti transfer"],
-    [entry.qr_tactlink_mime, "tactlink", "QR TactLink"],
-  ]) {
-    const item = document.createElement("li");
-    if (mime) {
-      const download = document.createElement("a");
-      download.className = "admin-proof-link";
-      download.href = "/api/admin?" + new URLSearchParams({ proof: entry.request_id, file });
-      download.textContent = label;
-      download.setAttribute("aria-label", "Unduh " + label);
-      item.append(download);
-    } else {
-      item.textContent = label + " belum tersedia";
-    }
-    detailFiles.append(item);
+  const item = document.createElement("li");
+  if (entry.qr_tactlink_mime) {
+    const download = document.createElement("a");
+    download.className = "admin-detail-link";
+    download.href = "/api/admin?" + new URLSearchParams({ proof: entry.request_id, file: "tactlink" });
+    download.textContent = "QR TactLink";
+    download.setAttribute("aria-label", "Unduh QR TactLink");
+    item.append(download);
+  } else {
+    item.textContent = "QR TactLink belum tersedia";
   }
+  detailFiles.append(item);
   detailDialog.showModal();
 }
 
@@ -132,7 +146,21 @@ function renderRows(data) {
     detail.textContent = "Detail";
     detail.setAttribute("aria-label", "Detail registrasi " + entry.nama);
     detail.addEventListener("click", () => showDetail(entry));
-    action.append(detail);
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "admin-control admin-delete-button";
+    remove.textContent = "Hapus";
+    remove.setAttribute("aria-label", "Hapus registrasi " + entry.nama);
+    remove.addEventListener("click", () => {
+      pendingDelete = entry;
+      deleteName.textContent = entry.nama;
+      deleteStatus.textContent = "";
+      deleteDialog.showModal();
+    });
+    const actions = document.createElement("div");
+    actions.className = "admin-row-actions";
+    actions.append(detail, remove);
+    action.append(actions);
     content.append(row);
   }
   rows.replaceChildren(content);
@@ -219,6 +247,32 @@ detailDialog.addEventListener("close", () => {
   if (!dashboard.hidden && document.activeElement === document.body)
     searchForm.elements.search.focus();
 });
+deleteCancel.addEventListener("click", () => deleteDialog.close());
+deleteDialog.addEventListener("cancel", (event) => {
+  if (deleteConfirm.disabled) event.preventDefault();
+});
+deleteConfirm.addEventListener("click", async () => {
+  if (!pendingDelete || deleteConfirm.disabled) return;
+  const { request_id: requestId } = pendingDelete;
+  deleteConfirm.disabled = true;
+  deleteCancel.disabled = true;
+  deleteStatus.textContent = "Menghapus data…";
+  try {
+    await request("DELETE", { body: { requestId } });
+  } catch (error) {
+    if (error.status !== 404) {
+      reportError(error, deleteStatus);
+      return;
+    }
+  } finally {
+    deleteConfirm.disabled = false;
+    deleteCancel.disabled = false;
+  }
+  pendingDelete = undefined;
+  deleteDialog.close();
+  await loadRows();
+  if (!dashboard.hidden) searchForm.elements.search.focus();
+});
 logout.addEventListener("click", () => {
   logoutStatus.textContent = "";
   logoutDialog.showModal();
@@ -248,6 +302,7 @@ setInterval(() => {
     !document.hidden &&
     !dashboard.hidden &&
     !detailDialog.open &&
+    !deleteDialog.open &&
     !logoutDialog.open &&
     !reading
   ) {

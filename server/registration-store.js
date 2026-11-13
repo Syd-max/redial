@@ -1,4 +1,5 @@
 import { sponsorPackages } from "../src/sponsor-packages.js";
+import { normalizeEmail, normalizePhone } from "../src/registration-contact.js";
 
 const requestIdPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -9,7 +10,7 @@ export function isRequestId(value) {
 
 export function validateRegistrationFields(body) {
   if (!body || typeof body !== "object") return null;
-  const { name, institution, gender, sponsorPackage } = body;
+  const { name, institution, gender, sponsorPackage, phone, email } = body;
   if (typeof name !== "string" || !name.trim() || name.trim().length > 120)
     return null;
   if (
@@ -28,6 +29,14 @@ export function validateRegistrationFields(body) {
     if (sponsorPackage !== "" && !sponsorPackages.includes(sponsorPackage))
       return null;
     fields.paket_sponsor = sponsorPackage || null;
+  }
+  if (phone !== undefined) {
+    fields.nomor_telepon = normalizePhone(phone);
+    if (!fields.nomor_telepon) return null;
+  }
+  if (email !== undefined) {
+    fields.email = normalizeEmail(email);
+    if (!fields.email) return null;
   }
   return fields;
 }

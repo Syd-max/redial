@@ -7,7 +7,7 @@ import { getProofExtension } from "../server/payment-proof.js";
 
 const sessionCookie = "redial_admin_session";
 const pageSize = 30;
-const columns = "request_id,nama,instansi,jenis_kelamin,paket_sponsor,bukti_transfer_mime,qr_tactlink_mime,created_at";
+const columns = "request_id,nama,instansi,jenis_kelamin,nomor_telepon,email,qr_tactlink_mime,created_at";
 const tokenPattern = /^[\w-]+\.[\w-]+\.[\w-]+$/;
 
 function setSession(req, res, token, maxAge) {
@@ -217,7 +217,7 @@ export default async function admin(req, res) {
     if (method === "PATCH" && !fields) {
       return res
         .status(400)
-        .json({ error: "Periksa nama, instansi, jenis kelamin, dan paket sponsor." });
+        .json({ error: "Periksa kembali data pendaftaran." });
     }
     const response = await store.request(
       new URLSearchParams({
