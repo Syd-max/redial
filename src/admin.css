@@ -288,10 +288,13 @@
 }
 .admin-delete-button {
   border-radius: 999px;
-  color: var(--red);
+  border-color: var(--red);
+  background: var(--red);
+  color: #fffaf1;
 }
 .admin-delete-button:hover {
-  background: #f7e8e2;
+  border-color: #6f1c29;
+  background: #6f1c29;
 }
 .admin-detail-button {
   border-color: #dcc8af;
