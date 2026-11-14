@@ -9,15 +9,25 @@ create table if not exists public.redial_pendaftaran (
   jenis_kelamin text not null check (jenis_kelamin in ('laki-laki', 'perempuan')),
   nomor_telepon text not null check (nomor_telepon ~ '^[+]?[0-9]{8,15}$'),
   email text not null check (char_length(email) between 3 and 254),
+  jenis_tiket text not null check (jenis_tiket in ('SINGLE', 'DUO')),
+  bukti_transfer bytea not null check (octet_length(bukti_transfer) between 1 and 2000000),
+  bukti_transfer_mime text not null check (bukti_transfer_mime in ('image/jpeg', 'image/png', 'image/webp', 'application/pdf')),
   qr_tactlink bytea not null check (octet_length(qr_tactlink) between 1 and 2000000),
   qr_tactlink_mime text not null check (qr_tactlink_mime in ('image/jpeg', 'image/png')),
   created_at timestamptz not null default now()
 );
 
 -- Tabel lama: tambahkan kolom yang belum ada. Baris lama boleh belum memiliki
--- kontak atau QR. API mewajibkannya untuk setiap pendaftaran baru.
--- Kolom paket sponsor dan bukti transfer yang sudah ada tetap disimpan.
+-- kontak, paket, atau berkas. API mewajibkannya untuk pendaftaran baru.
 alter table public.redial_pendaftaran
+  add column if not exists jenis_tiket text
+    check (jenis_tiket in ('SINGLE', 'DUO')),
+  add column if not exists paket_sponsor text
+    check (paket_sponsor in ('Normal', 'Silver', 'Gold', 'Platinum', 'Priority')),
+  add column if not exists bukti_transfer bytea
+    check (octet_length(bukti_transfer) between 1 and 2000000),
+  add column if not exists bukti_transfer_mime text
+    check (bukti_transfer_mime in ('image/jpeg', 'image/png', 'image/webp', 'application/pdf')),
   add column if not exists nomor_telepon text
     check (nomor_telepon ~ '^[+]?[0-9]{8,15}$'),
   add column if not exists email text

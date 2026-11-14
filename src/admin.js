@@ -1,12 +1,15 @@
-import { normalizeEmail } from "./registration-contact.js";
+import { normalizeEmail, whatsappUrl } from "./registration-contact.js";
 
 const startup = document.querySelector("#admin-startup");
 const login = document.querySelector("#admin-login");
 const dashboard = document.querySelector("#admin-dashboard");
+const dashboardTools = document.querySelector("#admin-dashboard-tools");
+const adminHeader = document.querySelector(".admin-header");
 const loginForm = document.querySelector("#login-form");
 const searchForm = document.querySelector("#search-form");
 const detailDialog = document.querySelector("#detail-dialog");
 const detailFields = detailDialog.querySelectorAll("[data-detail]");
+const legacySponsorDetail = detailDialog.querySelector("#legacy-sponsor-detail");
 const detailFiles = document.querySelector("#detail-files");
 const closeDetail = document.querySelector("#close-detail");
 const deleteDialog = document.querySelector("#delete-dialog");
@@ -63,6 +66,7 @@ function showLogin(message = "") {
   startup.hidden = true;
   login.hidden = false;
   dashboard.hidden = true;
+  dashboardTools.hidden = true;
   logout.hidden = true;
   rows.replaceChildren();
   loginStatus.textContent = message;
@@ -72,6 +76,7 @@ function showDashboard() {
   startup.hidden = true;
   login.hidden = true;
   dashboard.hidden = false;
+  dashboardTools.hidden = false;
   logout.hidden = false;
 }
 
@@ -97,9 +102,22 @@ function showDetail(entry) {
     gender: entry.jenis_kelamin === "laki-laki" ? "Laki-laki" : "Perempuan",
     phone: entry.nomor_telepon || "Belum tersedia",
     email: email ?? "Belum tersedia",
+    ticket: entry.jenis_tiket || "Belum tersedia",
+    sponsor: entry.paket_sponsor || "",
     time: registrationTime(entry),
   };
   for (const field of detailFields) field.textContent = values[field.dataset.detail];
+  legacySponsorDetail.hidden = !values.sponsor;
+  const whatsapp = whatsappUrl(entry.nomor_telepon);
+  if (whatsapp) {
+    const link = document.createElement("a");
+    link.className = "admin-detail-link";
+    link.href = whatsapp;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = entry.nomor_telepon;
+    detailDialog.querySelector('[data-detail="phone"]').replaceChildren(link);
+  }
   if (email) {
     const link = document.createElement("a");
     const [local, domain] = email.split("@");
@@ -110,25 +128,34 @@ function showDetail(entry) {
   }
 
   detailFiles.replaceChildren();
-  const item = document.createElement("li");
-  if (entry.qr_tactlink_mime) {
-    const download = document.createElement("a");
-    download.className = "admin-detail-link";
-    download.href = "/api/admin?" + new URLSearchParams({ proof: entry.request_id, file: "tactlink" });
-    download.textContent = "QR TactLink";
-    download.setAttribute("aria-label", "Unduh QR TactLink");
-    item.append(download);
-  } else {
-    item.textContent = "QR TactLink belum tersedia";
+  for (const [file, label, mime] of [
+    ["payment", "Bukti transfer QRIS", entry.bukti_transfer_mime],
+    ["tactlink", "QR TactLink", entry.qr_tactlink_mime],
+  ]) {
+    const item = document.createElement("li");
+    if (mime) {
+      const download = document.createElement("a");
+      download.className = "admin-detail-link";
+      download.href = "/api/admin?" + new URLSearchParams({ proof: entry.request_id, file });
+      download.textContent = label;
+      download.setAttribute("aria-label", "Unduh " + label);
+      item.append(download);
+    } else {
+      item.textContent = label + " belum tersedia";
+    }
+    detailFiles.append(item);
   }
-  detailFiles.append(item);
   detailDialog.showModal();
 }
 
-function renderRows(data) {
+function renderRows(data, offset) {
   const content = document.createDocumentFragment();
-  for (const entry of data) {
+  for (const [index, entry] of data.entries()) {
     const row = document.createElement("tr");
+    const number = row.insertCell();
+    number.className = "admin-row-number";
+    number.dataset.label = "No.";
+    number.textContent = String(offset + index + 1);
     for (const [label, value] of [
       ["Nama", entry.nama],
       ["Instansi", entry.instansi],
@@ -185,7 +212,7 @@ async function loadRows(nextPage = page, nextSearch = search, silent = false) {
     showDashboard();
     page = nextPage;
     search = nextSearch;
-    renderRows(data.rows);
+    renderRows(data.rows, data.offset);
     table.hidden = !data.rows.length;
     pagination.hidden = page === 1 && !data.hasNext;
     pageNumber.textContent = "Halaman " + page;
@@ -309,4 +336,7 @@ setInterval(() => {
     void loadRows(page, search, true);
   }
 }, 30000);
+new ResizeObserver(() => {
+  dashboard.style.setProperty("--admin-header-height", `${adminHeader.getBoundingClientRect().height}px`);
+}).observe(adminHeader, { box: "border-box" });
 void loadRows();

@@ -6,14 +6,15 @@ import {
 import { parseRegistrationFile } from "../server/payment-proof.js";
 import { maxProofBytes } from "../src/payment-proof.js";
 import { hasReadableQr } from "../server/registration-qr.js";
+import { ticketTypes } from "../src/ticket-types.js";
 
-const maxBodyBytes = maxProofBytes + 16_384;
+const maxBodyBytes = maxProofBytes * 2 + 16_384;
 
 export function validateRegistration(body) {
   const fields = validateRegistrationFields(body);
-  if (!fields?.nomor_telepon || !fields.email || !isRequestId(body.requestId)) return null;
+  if (!fields?.nomor_telepon || !fields.email || !ticketTypes.includes(body.ticketType) || !isRequestId(body.requestId)) return null;
   const { nama, instansi, jenis_kelamin, nomor_telepon, email } = fields;
-  return { request_id: body.requestId, nama, instansi, jenis_kelamin, nomor_telepon, email };
+  return { request_id: body.requestId, nama, instansi, jenis_kelamin, nomor_telepon, email, jenis_tiket: body.ticketType };
 }
 
 export default async function registration(req, res) {
@@ -33,7 +34,7 @@ export default async function registration(req, res) {
       size += chunk.length;
       if (size > maxBodyBytes) {
         req.resume();
-        return res.status(413).json({ error: "Ukuran gambar QR TactLink maksimal 2 MB." });
+        return res.status(413).json({ error: "Setiap berkas maksimal 2 MB." });
       }
       chunks.push(chunk);
     }
@@ -47,7 +48,9 @@ export default async function registration(req, res) {
   if (!data)
     return res
       .status(400)
-      .json({ error: "Periksa nama, instansi, jenis kelamin, nomor telepon, dan email." });
+      .json({ error: "Periksa nama, instansi, jenis kelamin, nomor WhatsApp, email, dan pilihan tiket." });
+  const proof = await parseRegistrationFile(form.get("paymentProof"), "bukti transfer QRIS");
+  if (proof.error) return res.status(proof.status).json({ code: "PAYMENT_PROOF_INVALID", error: proof.error });
   const qr = await parseRegistrationFile(form.get("tactlinkQr"), "QR TactLink", true);
   if (qr.error) return res.status(qr.status).json({ error: qr.error });
   if (!await hasReadableQr(qr.bytes)) {
@@ -67,6 +70,8 @@ export default async function registration(req, res) {
       headers: { Prefer: "resolution=ignore-duplicates,return=minimal" },
       body: JSON.stringify({
         ...data,
+        bukti_transfer: "\\x" + proof.bytes.toString("hex"),
+        bukti_transfer_mime: proof.mime,
         qr_tactlink: "\\x" + qr.bytes.toString("hex"),
         qr_tactlink_mime: qr.mime,
       }),

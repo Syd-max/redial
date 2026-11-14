@@ -7,7 +7,7 @@ import { getProofExtension } from "../server/payment-proof.js";
 
 const sessionCookie = "redial_admin_session";
 const pageSize = 30;
-const columns = "request_id,nama,instansi,jenis_kelamin,nomor_telepon,email,qr_tactlink_mime,created_at";
+const columns = "request_id,nama,instansi,jenis_kelamin,nomor_telepon,email,jenis_tiket,paket_sponsor,bukti_transfer_mime,qr_tactlink_mime,created_at";
 const tokenPattern = /^[\w-]+\.[\w-]+\.[\w-]+$/;
 
 function setSession(req, res, token, maxAge) {
@@ -181,11 +181,12 @@ export default async function admin(req, res) {
       if (!Number.isSafeInteger(page) || page < 1 || page > 100000) {
         return res.status(400).json({ error: "Nomor halaman tidak valid." });
       }
+      const offset = (page - 1) * pageSize;
       const query = new URLSearchParams({
         select: columns,
         order: "created_at.desc,id.desc",
         limit: String(pageSize + 1),
-        offset: String((page - 1) * pageSize),
+        offset: String(offset),
       });
       if (search) {
         // Escape the literal search for PostgreSQL regex and PostgREST's quoted filter.
@@ -205,6 +206,7 @@ export default async function admin(req, res) {
         .json({
           rows: rows.slice(0, pageSize),
           hasNext: rows.length > pageSize,
+          offset,
         });
     }
 

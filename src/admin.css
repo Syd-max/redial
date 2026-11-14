@@ -3,10 +3,13 @@
   margin-inline: auto;
 }
 .admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background: #fffaf1;
   border-bottom: 1px solid var(--line);
 }
-.admin-header .admin-shell {
+.admin-header > .admin-shell:first-child {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -174,16 +177,19 @@
     width: min(90%, 275px);
   }
 }
+.admin-dashboard-tools {
+  padding-block: 12px 14px;
+}
 .admin-heading {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 8px 16px;
   align-items: center;
   justify-content: space-between;
-  margin-block: clamp(28px, 5vw, 60px) 22px;
+  margin-bottom: 10px;
 }
 .admin-heading h1 {
-  font-size: clamp(2.25rem, 6vw, 3.7rem);
+  font-size: clamp(1.55rem, 4vw, 2.65rem);
   line-height: 1;
 }
 .admin-search {
@@ -248,14 +254,14 @@
 }
 .admin-table-wrap {
   margin-top: 16px;
-  overflow: hidden;
+  overflow: clip;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #fffaf1;
 }
 .admin-table {
   width: 100%;
-  border-collapse: collapse;
+  border-spacing: 0;
   font-size: 0.9rem;
   text-align: left;
 }
@@ -271,11 +277,28 @@
   font-size: 0.8rem;
   font-weight: 600;
 }
+@media (min-width: 700px) {
+  .admin-table th {
+    position: sticky;
+    top: var(--admin-header-height, 0px);
+    z-index: 1;
+  }
+}
 .admin-table tbody tr:last-child td {
   border-bottom: 0;
 }
-.admin-table td:first-child {
+.admin-table td[data-label="Nama"] {
   font-weight: 600;
+}
+.admin-row-number {
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 700px) {
+  .admin-row-number {
+    width: 1%;
+    text-align: center;
+    white-space: nowrap;
+  }
 }
 .admin-row-detail {
   text-align: right;

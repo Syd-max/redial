@@ -6,21 +6,27 @@ const heading = document.querySelector(".registration-heading");
 const success = document.querySelector("#registration-success");
 const status = document.querySelector("#form-status");
 const submit = form.querySelector('[type="submit"]');
-const submitActions = form.querySelector(".registration-step-actions");
+const submitActions = submit.parentElement;
 const institution = form.elements.institution;
 const otherInstitution = form.elements.institutionOther;
 const otherInstitutionField = document.querySelector("#institution-other-field");
 const dataStep = document.querySelector("#registration-data-step");
 const tactlinkStep = document.querySelector("#registration-tactlink-step");
+const dresscodeStep = document.querySelector("#registration-dresscode-step");
 const stepCaption = document.querySelector("#registration-step-caption");
 const stepProgress = document.querySelector("#registration-progress");
 const stepLabels = document.querySelectorAll(".registration-steps li");
 const next = document.querySelector("#registration-next");
 const back = document.querySelector("#registration-back");
+const dresscodeNext = document.querySelector("#registration-dresscode-next");
+const dresscodeBack = document.querySelector("#registration-dresscode-back");
 const video = document.querySelector(".tactlink-video");
 const videoChoices = [...document.querySelectorAll(".tactlink-videos button")];
 const qrInput = form.elements.tactlinkQr;
 const qrError = document.querySelector("#tactlink-qr-error");
+const ticketType = form.elements.ticketType;
+const proofInput = form.elements.paymentProof;
+const proofError = document.querySelector("#proof-error");
 const { phone, email } = form.elements;
 let step = 1;
 
@@ -39,6 +45,29 @@ institution.addEventListener("change", syncOtherInstitution);
 window.addEventListener("pageshow", syncOtherInstitution);
 syncOtherInstitution();
 
+const archive = form.querySelector(".sponsor-archive");
+const archiveContent = form.querySelector("#sponsor-archive-content");
+const archiveAction = archive.querySelector(".sponsor-archive-action");
+const stamp = archive.querySelector(".sponsor-stamp");
+
+archiveContent.hidden = true;
+archive.hidden = false;
+archive.addEventListener("click", () => {
+  const open = archiveContent.hidden;
+  archiveContent.hidden = !open;
+  archive.setAttribute("aria-expanded", String(open));
+  archiveAction.textContent = open ? "Tutup detail" : "Lihat detail";
+});
+
+for (const details of archiveContent.querySelectorAll("details")) {
+  details.addEventListener("toggle", () => {
+    if (!details.open) return;
+    const [name, price] = details.querySelector("summary").children;
+    stamp.firstElementChild.textContent = name.textContent;
+    stamp.lastElementChild.textContent = price?.textContent ?? "";
+  });
+}
+
 function showVideo(choice) {
   for (const button of videoChoices) button.setAttribute("aria-pressed", String(button === choice));
   const { video: id, title } = choice.dataset;
@@ -56,7 +85,8 @@ function showStep(number, focus = true) {
   step = number;
   dataStep.hidden = number !== 1;
   tactlinkStep.hidden = number !== 2;
-  stepCaption.textContent = `Langkah ${number} dari 2`;
+  dresscodeStep.hidden = number !== 3;
+  stepCaption.textContent = `Langkah ${number} dari ${stepProgress.max}`;
   stepProgress.value = number;
   stepLabels.forEach((label, index) => {
     if (index + 1 === number) label.setAttribute("aria-current", "step");
@@ -73,7 +103,7 @@ function showStep(number, focus = true) {
 function validateStep(number) {
   if (number === 1) {
     phone.setCustomValidity(phone.value && !normalizePhone(phone.value)
-      ? "Masukkan nomor telepon yang valid (8–15 digit)." : "");
+      ? "Masukkan nomor WhatsApp yang valid (8–15 digit)." : "");
     email.setCustomValidity(email.value && !normalizeEmail(email.value)
       ? "Masukkan alamat email yang valid, misalnya nama@email.com." : "");
   }
@@ -97,6 +127,16 @@ back.addEventListener("click", () => {
   showStep(1);
 });
 
+function advanceToDresscode() {
+  if (validateStep(2)) showStep(3);
+}
+
+dresscodeNext.addEventListener("click", advanceToDresscode);
+dresscodeBack.addEventListener("click", () => {
+  status.textContent = "";
+  showStep(2);
+});
+
 function showUploadError(input, error, message) {
   if (message) {
     input.value = "";
@@ -107,6 +147,17 @@ function showUploadError(input, error, message) {
   input.setCustomValidity(message);
   error.textContent = message;
 }
+
+proofInput.addEventListener("change", () => {
+  const file = proofInput.files[0];
+  let message = "";
+  if (file?.size > maxProofBytes) {
+    message = "Ukuran bukti transfer maksimal 2 MB.";
+  } else if (file?.type && !proofInput.accept.split(",").includes(file.type)) {
+    message = "Pilih bukti transfer dalam format JPG, PNG, WebP, atau PDF.";
+  }
+  showUploadError(proofInput, proofError, message);
+});
 
 async function scanQrImage(file) {
   const { hasQrCode, qrScanMaxSide } = await import("./qr-code.js");
@@ -153,12 +204,17 @@ qrInput.addEventListener("change", async () => {
 let requestId = crypto.randomUUID();
 let lastFields = "";
 let lastQrFile;
+let lastProofFile;
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (form.hidden || submit.disabled) return;
   if (step === 1) {
     advance();
+    return;
+  }
+  if (step === 2) {
+    advanceToDresscode();
     return;
   }
   if (!validateStep(1) || !validateStep(2)) return;
@@ -169,19 +225,23 @@ form.addEventListener("submit", async (event) => {
     institution: institution.value === "lainnya" ? otherInstitution.value.trim() : institution.value,
     phone: normalizePhone(phone.value),
     email: normalizeEmail(email.value),
+    ticketType: ticketType.value,
   };
   const currentFields = JSON.stringify(fields);
   const qrFile = qrInput.files[0];
-  if (lastFields && (currentFields !== lastFields || qrFile !== lastQrFile))
+  const proofFile = proofInput.files[0];
+  if (lastFields && (currentFields !== lastFields || qrFile !== lastQrFile || proofFile !== lastProofFile))
     requestId = crypto.randomUUID();
   lastFields = currentFields;
   lastQrFile = qrFile;
+  lastProofFile = proofFile;
   const payload = new FormData();
   for (const [key, value] of Object.entries({ ...fields, requestId })) payload.set(key, value);
   payload.set(qrInput.name, qrFile);
+  payload.set(proofInput.name, proofFile);
 
   submit.disabled = true;
-  back.disabled = true;
+  dresscodeBack.disabled = true;
   qrInput.disabled = true;
   submitActions.setAttribute("aria-busy", "true");
   status.textContent = "Menyimpan pendaftaran…";
@@ -192,10 +252,18 @@ form.addEventListener("submit", async (event) => {
       signal: AbortSignal.timeout(30000),
     });
     const result = await response.json();
+    if (result.code === "PAYMENT_PROOF_INVALID") {
+      showUploadError(proofInput, proofError, result.error);
+      status.textContent = "";
+      showStep(1, false);
+      proofInput.focus();
+      return;
+    }
     if (result.code === "QR_UNREADABLE") {
       qrInput.disabled = false;
       showUploadError(qrInput, qrError, result.error);
       status.textContent = "";
+      showStep(2, false);
       qrInput.focus();
       return;
     }
@@ -206,6 +274,7 @@ form.addEventListener("submit", async (event) => {
     status.textContent = "";
     form.reset();
     lastQrFile = undefined;
+    lastProofFile = undefined;
     video.removeAttribute("src");
     heading.hidden = true;
     form.hidden = true;
@@ -219,7 +288,7 @@ form.addEventListener("submit", async (event) => {
         : error.message;
   } finally {
     submit.disabled = false;
-    back.disabled = false;
+    dresscodeBack.disabled = false;
     qrInput.disabled = false;
     submitActions.removeAttribute("aria-busy");
   }

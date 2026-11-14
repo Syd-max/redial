@@ -29,6 +29,31 @@
           <button class="back-link admin-logout" id="logout" type="button" hidden>Keluar</button>
         </div>
       </div>
+      <div class="admin-shell admin-dashboard-tools" id="admin-dashboard-tools" hidden>
+        <div class="admin-heading">
+          <h1 id="dashboard-title">Data REDIAL 5.0</h1>
+          <button class="admin-control" id="refresh" type="button">
+            Muat ulang
+          </button>
+        </div>
+        <form class="admin-search" id="search-form" role="search">
+          <label class="sr-only" for="admin-search"
+            >Cari nama atau instansi</label
+          >
+          <svg class="admin-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="m16 16 4 4" />
+          </svg>
+          <input
+            id="admin-search"
+            name="search"
+            type="search"
+            placeholder="Cari nama atau instansi"
+            maxlength="120"
+          />
+          <button class="admin-control" type="submit">Cari</button>
+        </form>
+      </div>
     </header>
     <main class="admin-shell">
       <div id="admin-startup" class="admin-startup-skeleton form-card skeleton-form-card" role="status">
@@ -77,34 +102,12 @@
         </form>
       </section>
       <section id="admin-dashboard" aria-labelledby="dashboard-title" hidden>
-        <div class="admin-heading">
-          <h1 id="dashboard-title">Data REDIAL 5.0</h1>
-          <button class="admin-control" id="refresh" type="button">
-            Muat ulang
-          </button>
-        </div>
-        <form class="admin-search" id="search-form" role="search">
-          <label class="sr-only" for="admin-search"
-            >Cari nama atau instansi</label
-          >
-          <svg class="admin-search-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="6.5" />
-            <path d="m16 16 4 4" />
-          </svg>
-          <input
-            id="admin-search"
-            name="search"
-            type="search"
-            placeholder="Cari nama atau instansi"
-            maxlength="120"
-          />
-          <button class="admin-control" type="submit">Cari</button>
-        </form>
         <p class="admin-note" id="dashboard-status" role="status"></p>
         <div class="admin-table-wrap" id="table-wrap" hidden>
           <table class="admin-table" aria-label="Daftar peserta">
             <thead>
               <tr>
+                <th scope="col" class="admin-row-number">No.</th>
                 <th scope="col">Nama</th>
                 <th scope="col">Instansi</th>
                 <th scope="col">Waktu daftar</th>
@@ -134,8 +137,10 @@
         <div><dt>Nama</dt><dd data-detail="name"></dd></div>
         <div><dt>Jenis kelamin</dt><dd data-detail="gender"></dd></div>
         <div><dt>Instansi</dt><dd data-detail="institution"></dd></div>
-        <div><dt>Nomor telepon</dt><dd data-detail="phone"></dd></div>
+        <div><dt>Nomor WhatsApp</dt><dd data-detail="phone"></dd></div>
         <div><dt>Email</dt><dd data-detail="email"></dd></div>
+        <div><dt>Jenis tiket</dt><dd data-detail="ticket"></dd></div>
+        <div id="legacy-sponsor-detail" hidden><dt>Paket sponsor</dt><dd data-detail="sponsor"></dd></div>
         <div><dt>Waktu daftar</dt><dd data-detail="time"></dd></div>
       </dl>
       <section class="admin-detail-files" aria-labelledby="detail-files-title">

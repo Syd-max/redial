@@ -12,11 +12,11 @@ Gunakan Node.js 22+, lalu `npm install` dan `npm run dev`. Jalankan `npm test` d
 2. Isi `SUPABASE_URL` dan `SUPABASE_SECRET_KEY` di `.env.local` untuk lokal dan Environment Variables di Vercel. Key hanya digunakan pada server.
 3. Push repository ke GitHub dan import di Vercel. Build `npm run build`, output `dist`.
 
-Pendaftaran dua langkah mewajibkan data peserta, nomor telepon, email, dan tangkapan layar QR TactLink maksimal 2 MB. Server memvalidasi format kontak dan memindai gambar QR sebelum menyimpan. Data dan berkas disimpan dalam satu baris dengan ID permintaan untuk mencegah duplikasi saat retry.
+Pendaftaran meminta data peserta, nomor telepon, email, pilihan tiket SINGLE atau DUO, bukti transfer QRIS, dan tangkapan layar QR TactLink. Batas unggahan adalah 2 MB per berkas. Server memvalidasi format kontak dan memindai gambar QR sebelum menyimpan. Data dan berkas disimpan dalam satu baris dengan ID permintaan untuk mencegah duplikasi saat retry.
 
 ## Dashboard admin
 
-1. Jika tabel sudah ada, jalankan kembali `supabase/redial.sql` sebelum deploy versi dengan kolom kontak. Skrip menambah kolom tanpa menghapus data lama. Kontak dan berkas dapat dilihat melalui **Detail**.
+1. Jika tabel sudah ada, jalankan kembali `supabase/redial.sql` sebelum deploy versi dengan pilihan tiket. Skrip menambah kolom tanpa menghapus data lama. Kontak, jenis tiket, dan berkas dapat dilihat melalui **Detail**.
 2. Buat akun email dan kata sandi di **Supabase → Authentication → Users**, lalu salin UUID akun tersebut.
 3. Isi `REDIAL_ADMIN_USER_ID` dengan UUID tersebut dan `SUPABASE_PUBLISHABLE_KEY` dengan publishable key project. Isi variabel di `.env.local` dan Environment Variables di Vercel bersama `SUPABASE_URL` dan `SUPABASE_SECRET_KEY`. Restart dev server setelah mengubah `.env.local`.
 4. Buka `/admin/` dan masuk memakai akun tadi. Dashboard membaca data yang tersimpan dari `/daftar/` dan memuat ulang setiap 30 detik saat aktif. Tombol **Muat ulang** menampilkan data terbaru kapan saja.

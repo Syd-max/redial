@@ -70,11 +70,12 @@
       </div>
       <form id="registration-form" class="form-card" action="/api/pendaftaran" method="post" enctype="multipart/form-data" novalidate aria-label="Pendaftaran REDIAL 5.0">
         <div class="registration-step-header">
-          <p id="registration-step-caption" tabindex="-1">Langkah 1 dari 2</p>
-          <progress id="registration-progress" max="2" value="1" aria-label="Progres pendaftaran"></progress>
+          <p id="registration-step-caption" tabindex="-1">Langkah 1 dari 3</p>
+          <progress id="registration-progress" max="3" value="1" aria-label="Progres pendaftaran"></progress>
           <ol class="registration-steps" aria-label="Langkah pendaftaran">
             <li aria-current="step"><span aria-hidden="true">1</span> Data Pendaftaran</li>
             <li><span aria-hidden="true">2</span> Siapkan TactLink</li>
+            <li><span aria-hidden="true">3</span> Dresscode</li>
           </ol>
         </div>
         <div id="registration-data-step">
@@ -115,13 +116,70 @@
             <input id="institution-other" name="institutionOther" autocomplete="organization" maxlength="160" disabled />
           </div>
           <div class="field">
-            <label for="registration-phone">Nomor telepon</label>
+            <label for="registration-phone">Nomor WhatsApp</label>
             <input id="registration-phone" name="phone" type="tel" autocomplete="tel" maxlength="32" placeholder="Contoh: 081234567890" required />
           </div>
           <div class="field">
             <label for="registration-email">Email</label>
             <input id="registration-email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="Contoh: nama@email.com" required />
           </div>
+          <section class="sponsor-guide" aria-labelledby="sponsor-guide-title">
+            <h2 id="sponsor-guide-title">Tiket</h2>
+            <button class="sponsor-archive" type="button" aria-expanded="false" aria-controls="sponsor-archive-content" hidden>
+              <span class="sponsor-scene" aria-hidden="true">
+                <span class="sponsor-pocket-back"></span>
+                <span class="sponsor-stamp">
+                  <strong>SINGLE</strong>
+                  <span>Rp65.000</span>
+                </span>
+                <span class="sponsor-pocket-cover">
+                  <img src="/assets/wordmark.webp" width="984" height="419" alt="" loading="lazy" decoding="async" />
+                </span>
+              </span>
+              <span class="sponsor-archive-action">Lihat detail</span>
+            </button>
+            <div id="sponsor-archive-content">
+              <details name="sponsor-guide" open>
+                <summary><span>SINGLE</span><span class="sponsor-price">Rp65.000</span></summary>
+                <ul>
+                  <li>Lunch Box</li>
+                  <li>Free photobox</li>
+                  <li>Custom bracelets</li>
+                </ul>
+              </details>
+              <details name="sponsor-guide">
+                <summary><span>DUO</span><span class="sponsor-price">Rp120.000</span></summary>
+                <ul>
+                  <li>Lunch Box</li>
+                  <li>Free photobox</li>
+                  <li>Custom bracelets</li>
+                </ul>
+              </details>
+            </div>
+          </section>
+          <div class="field">
+            <label for="ticket-type">Jenis tiket</label>
+            <select id="ticket-type" name="ticketType" required>
+              <option value="">Pilih tiket</option>
+              <option value="SINGLE">SINGLE</option>
+              <option value="DUO">DUO</option>
+            </select>
+          </div>
+          <section class="payment-card" aria-labelledby="payment-title">
+            <h2 id="payment-title">QRIS REDIAL 5.0</h2>
+            <div class="payment-qr-frame">
+              <img src="/assets/qris-penjualan.webp" alt="QRIS penjualan REDIAL 5.0" width="1000" height="1417" loading="lazy" decoding="async" />
+            </div>
+            <a class="text-link" href="/assets/qris-penjualan.webp" download="QRIS-REDIAL.webp">
+              Simpan QRIS <span aria-hidden="true">↓</span>
+            </a>
+          </section>
+          <section class="registration-upload" aria-labelledby="proof-title">
+            <h2 id="proof-title"><label for="payment-proof">Bukti Transfer QRIS</label></h2>
+            <p id="proof-help">JPG, PNG, WebP, atau PDF. Maksimal 2 MB.</p>
+            <input id="payment-proof" name="paymentProof" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" aria-describedby="proof-help proof-error" required />
+            <p class="registration-file-error" id="proof-error" aria-live="polite"></p>
+          </section>
           <button class="button form-submit" id="registration-next" type="button">Lanjut ke TactLink</button>
         </div>
         <div id="registration-tactlink-step" hidden>
@@ -165,6 +223,19 @@
           </section>
           <div class="registration-step-actions">
             <button class="button registration-step-back" id="registration-back" type="button">Kembali</button>
+            <button class="button" id="registration-dresscode-next" type="button">Lanjut ke Dresscode</button>
+          </div>
+        </div>
+        <div id="registration-dresscode-step" hidden>
+          <section class="tactlink-guide registration-dresscode" aria-labelledby="registration-dresscode-title">
+            <h2 id="registration-dresscode-title">Dresscode Event</h2>
+            <img src="/assets/dresscode.jpg" width="650" height="870" alt="Panduan dresscode REDIAL 5.0" loading="lazy" />
+            <div class="tactlink-downloads">
+              <a href="/assets/dresscode.jpg" download="dresscode.jpg">Unduh Dresscode</a>
+            </div>
+          </section>
+          <div class="registration-step-actions">
+            <button class="button registration-step-back" id="registration-dresscode-back" type="button">Kembali</button>
             <button class="button" type="submit">Kirim pendaftaran</button>
             <div class="registration-submit-skeleton" aria-hidden="true">
               <span class="skeleton-block registration-skeleton-circle"></span>
