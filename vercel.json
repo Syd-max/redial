@@ -2,6 +2,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "cleanUrls": true,
+  "functions": {
+    "api/admin.js": {
+      "includeFiles": "server/assets/ticket-title.png",
+      "maxDuration": 45
+    }
+  },
   "headers": [
     {
       "source": "/assets/(.*)",

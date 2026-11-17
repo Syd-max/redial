@@ -421,6 +421,52 @@
   margin-bottom: 8px;
   font-size: 1.35rem;
 }
+.admin-ticket-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.admin-ticket-panel .admin-ticket-actions {
+  margin-top: 10px;
+}
+.admin-ticket-panel .admin-note:not(:empty) {
+  margin-top: 10px;
+}
+.admin-control.admin-ticket-primary {
+  border-color: var(--red);
+  background: var(--red);
+  color: white;
+  font-weight: 600;
+}
+.admin-control.admin-ticket-primary:hover:not(:disabled) {
+  filter: brightness(0.94);
+}
+.admin-ticket-preview {
+  position: relative;
+  margin-top: 12px;
+  border-radius: 12px;
+  background: #2e211c;
+  overflow: hidden;
+}
+.admin-ticket-preview video {
+  display: block;
+  width: 100%;
+  max-height: 34vh;
+  object-fit: contain;
+}
+.admin-ticket-preview::after {
+  position: absolute;
+  inset: 32% 12%;
+  border: 1px solid #fffaf1cc;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px #2e211c66;
+  content: "";
+  pointer-events: none;
+}
+.admin-ticket-panel .form-status:empty,
+#check-in-form .form-status:empty {
+  display: none;
+}
 
 @media (max-width: 699px) {
   .admin-table thead {

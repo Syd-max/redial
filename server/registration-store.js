@@ -47,15 +47,24 @@ export function getRegistrationStore() {
   if (!url || !key) return null;
   const headers = { apikey: key, "Content-Type": "application/json" };
   if (!key.startsWith("sb_secret_")) headers.Authorization = "Bearer " + key;
+  const rest = (path, options = {}) => fetch(url + "/rest/v1/" + path, {
+    ...options,
+    headers: { ...headers, ...options.headers },
+    signal: AbortSignal.timeout(10000),
+  });
 
   return {
     url,
-    request(query, options = {}) {
-      return fetch(url + "/rest/v1/redial_pendaftaran?" + query, {
-        ...options,
-        headers: { ...headers, ...options.headers },
-        signal: AbortSignal.timeout(10000),
+    request(query, options) {
+      return rest("redial_pendaftaran?" + query, options);
+    },
+    async rpc(name, body) {
+      const response = await rest("rpc/" + name, {
+        method: "POST",
+        body: JSON.stringify(body),
       });
+      if (!response.ok) throw new Error("Database operation failed");
+      return response.json();
     },
   };
 }

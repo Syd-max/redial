@@ -1,5 +1,6 @@
-import { normalizeEmail, whatsappUrl } from "./registration-contact.js";
 import { inject } from "@vercel/analytics";
+import { normalizeEmail, whatsappUrl } from "./registration-contact.js";
+import { setupTicketing } from "./admin-ticketing.js";
 
 inject();
 
@@ -17,6 +18,7 @@ const detailFiles = document.querySelector("#detail-files");
 const closeDetail = document.querySelector("#close-detail");
 const deleteDialog = document.querySelector("#delete-dialog");
 const deleteName = document.querySelector("#delete-name");
+const deleteTicketNote = document.querySelector("#delete-ticket-note");
 const deleteCancel = document.querySelector("#delete-cancel");
 const deleteConfirm = document.querySelector("#delete-confirm");
 const deleteStatus = document.querySelector("#delete-status");
@@ -45,6 +47,7 @@ let page = 1;
 let search = "";
 let reading;
 let pendingDelete;
+const ticketing = setupTicketing({ request, reportError, reload: () => loadRows(page, search, true), detailDialog });
 
 async function request(method, { body, query, signal } = {}) {
   const response = await fetch("/api/admin" + (query ? "?" + query : ""), {
@@ -53,17 +56,18 @@ async function request(method, { body, query, signal } = {}) {
     body: body ? JSON.stringify(body) : undefined,
     signal: signal
       ? AbortSignal.any([signal, AbortSignal.timeout(24000)])
-      : AbortSignal.timeout(24000),
+      : AbortSignal.timeout(body?.action === "approve-ticket" ? 42000 : 24000),
   });
   const data = await response.json();
   if (!response.ok)
-    throw Object.assign(new Error(data.error), { status: response.status });
+    throw Object.assign(new Error(data.error), { status: response.status, ticketEmailStatus: data.ticketEmailStatus });
   return data;
 }
 
 function showLogin(message = "") {
   reading?.abort();
   if (detailDialog.open) detailDialog.close();
+  ticketing.closeCheckIn();
   if (deleteDialog.open) deleteDialog.close();
   if (logoutDialog.open) logoutDialog.close();
   startup.hidden = true;
@@ -148,6 +152,7 @@ function showDetail(entry) {
     }
     detailFiles.append(item);
   }
+  ticketing.showTicketDetails(entry);
   detailDialog.showModal();
 }
 
@@ -184,6 +189,7 @@ function renderRows(data, offset) {
     remove.addEventListener("click", () => {
       pendingDelete = entry;
       deleteName.textContent = entry.nama;
+      deleteTicketNote.hidden = !entry.ticket_approved_at;
       deleteStatus.textContent = "";
       deleteDialog.showModal();
     });

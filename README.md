@@ -23,6 +23,17 @@ Pendaftaran meminta data peserta, nomor telepon, email, pilihan tiket SINGLE ata
 
 Hanya UUID yang ditetapkan yang bisa membaca, mengedit, atau menghapus pendaftaran serta mengunduh berkas. RLS aktif dan akses publik ke tabel ditutup. Sesi memakai cookie HttpOnly dan meminta login lagi setelah akses kedaluwarsa.
 
+### Tiket masuk dan Brevo
+
+1. Jalankan versi terbaru `supabase/redial.sql` sebelum deploy. Migrasi menambah tabel tiket dan status pengiriman. Registrasi lama tetap tersedia dan hanya dapat disetujui jika memiliki jenis tiket, email, dan bukti transfer.
+2. Autentikasi domain pengirim di Brevo lewat pengelola DNS aktif, lalu tambahkan alamat pengirim di Brevo. Isi `BREVO_API_KEY` sebagai **Secret** di Vercel dan `BREVO_SENDER_EMAIL` dengan alamat tersebut. Untuk uji lokal, gunakan variabel yang sama di `.env.local`.
+3. Buka **Detail**, cocokkan transfer QRIS dengan nominal paket, lalu pilih **Setujui & Kirim Tiket**. SINGLE mengirim satu PDF. DUO mengirim dua PDF berbeda dalam satu email ke alamat pendaftar. PDF mencantumkan Jumat, 27 November 2026 dan Selah Hall.
+4. Gunakan **Check-in tiket** pada dashboard. Scan barcode Code 128 memakai kamera atau masukkan ID yang tertera di bawah barcode. Setiap tiket hanya bisa dipakai sekali. Menghapus registrasi juga membatalkan tiketnya.
+
+Status **Diterima Brevo** berarti permintaan kirim diterima. Lihat **Transactional → Logs** di Brevo untuk status sampai atau pantul. Saat koneksi gagal, **Coba kirim lagi** memakai ID tiket yang sudah terbit. Jika hasil tetap tidak pasti dan dashboard meminta pengecekan, cari alamat tujuan dan waktu kirim di log Brevo sebelum mencatat hasil pengecekan. Setelah konfigurasi, uji SINGLE dan DUO dengan email internal dan scan barcode di perangkat panitia sebelum menyetujui registrasi peserta.
+
+Jika perlu kembali ke deployment web sebelumnya, biarkan migrasi tambahan di Supabase agar tiket dan riwayat check-in tetap tersimpan. Dashboard lama tidak menampilkan fitur tiket.
+
 ## Materi
 
 `assets-original/` menyimpan salinan aset dari PPTX/DOCX. `public/assets/` berisi versi WebP untuk website. QRIS dipakai untuk penjualan dan donasi sesuai konfirmasi pemilik proyek.

@@ -32,9 +32,10 @@
       <div class="admin-shell admin-dashboard-tools" id="admin-dashboard-tools" hidden>
         <div class="admin-heading">
           <h1 id="dashboard-title">Data REDIAL 5.0</h1>
-          <button class="admin-control" id="refresh" type="button">
-            Muat ulang
-          </button>
+          <div class="admin-ticket-actions">
+            <button class="admin-control" id="open-check-in" type="button">Check-in tiket</button>
+            <button class="admin-control" id="refresh" type="button">Muat ulang</button>
+          </div>
         </div>
         <form class="admin-search" id="search-form" role="search">
           <label class="sr-only" for="admin-search"
@@ -147,10 +148,46 @@
         <h3 id="detail-files-title">Berkas</h3>
         <ul class="admin-file-links" id="detail-files"></ul>
       </section>
+      <section class="admin-detail-files admin-ticket-panel" aria-labelledby="ticket-approval-title">
+        <h3 id="ticket-approval-title">Pembayaran dan tiket</h3>
+        <dl class="admin-detail-fields">
+          <div><dt>Nominal QRIS</dt><dd id="ticket-amount"></dd></div>
+          <div><dt>Verifikasi pembayaran</dt><dd id="ticket-payment"></dd></div>
+          <div><dt>Pengiriman email</dt><dd id="ticket-delivery"></dd></div>
+        </dl>
+        <p id="ticket-help" class="admin-note"></p>
+        <div class="admin-ticket-actions">
+          <button class="admin-control admin-ticket-primary" id="approve-ticket" type="button" hidden></button>
+          <button class="admin-control" id="email-received" type="button" hidden>Brevo menerima email</button>
+          <button class="admin-control" id="email-not-received" type="button" hidden>Brevo tidak menerima email</button>
+        </div>
+        <p class="form-status" id="ticket-status" role="status"></p>
+      </section>
     </dialog>
-    <dialog class="admin-dialog admin-confirm-dialog" id="delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-description">
+    <dialog class="admin-dialog" id="check-in-dialog" aria-labelledby="check-in-title">
+      <div class="admin-detail-header">
+        <h2 id="check-in-title">Check-in tiket</h2>
+        <button class="admin-control" id="close-check-in" type="button">Tutup</button>
+      </div>
+      <form id="check-in-form">
+        <div class="field">
+          <label for="ticket-code">ID tiket</label>
+          <input id="ticket-code" name="code" type="text" inputmode="numeric" maxlength="16" autocomplete="off" spellcheck="false" required />
+        </div>
+        <div class="admin-ticket-actions">
+          <button class="admin-control admin-ticket-primary" id="submit-check-in" type="submit">Check-in</button>
+          <button class="admin-control" id="scan-ticket" type="button">Scan dengan kamera</button>
+        </div>
+        <div id="scan-preview" class="admin-ticket-preview" hidden>
+          <video id="scan-video" aria-label="Pratinjau kamera" muted playsinline></video>
+        </div>
+        <p class="form-status" id="check-in-status" role="status"></p>
+      </form>
+    </dialog>
+    <dialog class="admin-dialog admin-confirm-dialog" id="delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-description delete-ticket-note">
       <h2 id="delete-title">Hapus data registrasi?</h2>
       <p id="delete-description">Data <strong id="delete-name"></strong> dan berkas yang terkait akan dihapus permanen.</p>
+      <p id="delete-ticket-note" class="admin-note" hidden>Tiket masuk dari registrasi ini juga akan batal.</p>
       <p class="form-status" id="delete-status" role="status"></p>
       <div class="admin-confirm-actions">
         <button class="back-link" id="delete-cancel" type="button" autofocus>Batal</button>

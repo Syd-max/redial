@@ -4,10 +4,11 @@ import {
   validateRegistrationFields,
 } from "../server/registration-store.js";
 import { getProofExtension } from "../server/payment-proof.js";
+import { approveAndSendTicket, checkInTicket, reconcileTicketEmail } from "../server/ticketing.js";
 
 const sessionCookie = "redial_admin_session";
 const pageSize = 30;
-const columns = "request_id,nama,instansi,jenis_kelamin,nomor_telepon,email,jenis_tiket,paket_sponsor,bukti_transfer_mime,qr_tactlink_mime,created_at";
+const columns = "request_id,nama,instansi,jenis_kelamin,nomor_telepon,email,jenis_tiket,paket_sponsor,bukti_transfer_mime,qr_tactlink_mime,created_at,ticket_approved_at,ticket_email_status,ticket_email_started_at,ticket_email_attempt_at";
 const tokenPattern = /^[\w-]+\.[\w-]+\.[\w-]+$/;
 
 function setSession(req, res, token, maxAge) {
@@ -210,22 +211,30 @@ export default async function admin(req, res) {
         });
     }
 
+    if (method === "PATCH" && body?.action === "check-in-ticket")
+      return await checkInTicket(store, body, res);
+
     if (!isRequestId(body?.requestId)) {
       return res
         .status(400)
         .json({ error: "Referensi pendaftaran tidak valid." });
     }
+    if (method === "PATCH" && body.action === "approve-ticket")
+      return await approveAndSendTicket(store, body, res);
+    if (method === "PATCH" && body.action === "reconcile-ticket-email")
+      return await reconcileTicketEmail(store, body, res);
+
     const fields = method === "PATCH" ? validateRegistrationFields(body) : null;
     if (method === "PATCH" && !fields) {
       return res
         .status(400)
         .json({ error: "Periksa kembali data pendaftaran." });
     }
+    const filter = new URLSearchParams({ select: "request_id", request_id: "eq." + body.requestId });
+    if (method === "PATCH") filter.set("ticket_approved_at", "is.null");
+    if (method === "DELETE") filter.set("ticket_email_status", "not.in.(sending,uncertain)");
     const response = await store.request(
-      new URLSearchParams({
-        select: "request_id",
-        request_id: "eq." + body.requestId,
-      }),
+      filter,
       {
         method,
         headers: { Prefer: "return=representation" },
@@ -235,9 +244,15 @@ export default async function admin(req, res) {
     if (!response.ok) throw new Error("Write failed");
     const rows = await response.json();
     if (!rows.length) {
-      return res
-        .status(404)
-        .json({ error: "Data pendaftaran sudah tidak tersedia." });
+      const check = await store.request(new URLSearchParams({
+        select: "request_id", request_id: "eq." + body.requestId, limit: "1",
+      }));
+      if (!check.ok) throw new Error("Read failed");
+      if (!(await check.json()).length)
+        return res.status(404).json({ error: "Data pendaftaran sudah tidak tersedia." });
+      return res.status(409).json({ error: method === "DELETE"
+        ? "Selesaikan pengecekan status email tiket sebelum menghapus registrasi."
+        : "Data tiket yang sudah disetujui tidak bisa diubah." });
     }
     return res.status(200).json({ ok: true });
   } catch {
