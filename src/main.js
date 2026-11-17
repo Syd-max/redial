@@ -2,6 +2,9 @@ import "lenis/dist/lenis.css";
 import "./countdown.js";
 import "./intro-audio.js";
 import { content } from "./content.js";
+import { inject } from "@vercel/analytics";
+
+inject();
 
 const menu = document.querySelector(".menu-toggle");
 const links = document.querySelector(".nav-links");

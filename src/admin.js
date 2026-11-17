@@ -1,4 +1,7 @@
 import { normalizeEmail, whatsappUrl } from "./registration-contact.js";
+import { inject } from "@vercel/analytics";
+
+inject();
 
 const startup = document.querySelector("#admin-startup");
 const login = document.querySelector("#admin-login");
