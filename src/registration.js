@@ -1,5 +1,8 @@
 import { maxProofBytes } from "./payment-proof.js";
 import { normalizeEmail, normalizePhone } from "./registration-contact.js";
+import { inject } from "@vercel/analytics";
+
+inject();
 
 const form = document.querySelector("#registration-form");
 const heading = document.querySelector(".registration-heading");
