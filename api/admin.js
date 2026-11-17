@@ -183,23 +183,27 @@ export default async function admin(req, res) {
         return res.status(400).json({ error: "Nomor halaman tidak valid." });
       }
       const offset = (page - 1) * pageSize;
+      const checkIns = filters.get("view") === "check-ins";
       const query = new URLSearchParams({
-        select: columns,
-        order: "created_at.desc,id.desc",
+        select: checkIns
+          ? "code,position,checked_in_at,redial_pendaftaran!inner(nama,instansi,jenis_tiket)"
+          : columns,
+        order: checkIns ? "checked_in_at.desc,code.asc" : "created_at.desc,id.desc",
         limit: String(pageSize + 1),
         offset: String(offset),
       });
+      if (checkIns) query.set("checked_in_at", "not.is.null");
       if (search) {
         // Escape the literal search for PostgreSQL regex and PostgREST's quoted filter.
         const pattern = search
           .replace(/[.*+?^$(){}|[\]\\]/g, "\\$&")
           .replace(/["\\]/g, "\\$&");
         query.set(
-          "or",
+          checkIns ? "redial_pendaftaran.or" : "or",
           '(nama.imatch."' + pattern + '",instansi.imatch."' + pattern + '")',
         );
       }
-      const response = await store.request(query);
+      const response = await (checkIns ? store.requestTickets(query) : store.request(query));
       if (!response.ok) throw new Error("Read failed");
       const rows = await response.json();
       return res

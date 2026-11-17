@@ -37,23 +37,27 @@
             <button class="admin-control" id="refresh" type="button">Muat ulang</button>
           </div>
         </div>
-        <form class="admin-search" id="search-form" role="search">
-          <label class="sr-only" for="admin-search"
-            >Cari nama atau instansi</label
-          >
-          <svg class="admin-search-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="6.5" />
-            <path d="m16 16 4 4" />
-          </svg>
-          <input
-            id="admin-search"
-            name="search"
-            type="search"
-            placeholder="Cari nama atau instansi"
-            maxlength="120"
-          />
-          <button class="admin-control" type="submit">Cari</button>
-        </form>
+        <div class="admin-list-tools">
+          <div class="admin-list-nav" role="group" aria-label="Tampilan data">
+            <button type="button" data-admin-view="registrations" aria-pressed="true" aria-controls="registration-table">Registrasi</button>
+            <button type="button" data-admin-view="check-ins" aria-pressed="false" aria-controls="check-in-table">Sudah check-in</button>
+          </div>
+          <form class="admin-search" id="search-form" role="search">
+            <label class="sr-only" for="admin-search">Cari nama atau instansi</label>
+            <svg class="admin-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="m16 16 4 4" />
+            </svg>
+            <input
+              id="admin-search"
+              name="search"
+              type="search"
+              placeholder="Cari nama atau instansi"
+              maxlength="120"
+            />
+            <button class="admin-control" type="submit">Cari</button>
+          </form>
+        </div>
       </div>
     </header>
     <main class="admin-shell">
@@ -105,7 +109,7 @@
       <section id="admin-dashboard" aria-labelledby="dashboard-title" hidden>
         <p class="admin-note" id="dashboard-status" role="status"></p>
         <div class="admin-table-wrap" id="table-wrap" hidden>
-          <table class="admin-table" aria-label="Daftar peserta">
+          <table class="admin-table" id="registration-table" aria-label="Daftar peserta">
             <thead>
               <tr>
                 <th scope="col" class="admin-row-number">No.</th>
@@ -116,6 +120,19 @@
               </tr>
             </thead>
             <tbody id="registration-rows"></tbody>
+          </table>
+          <table class="admin-table" id="check-in-table" aria-label="Tiket yang sudah check-in" hidden>
+            <thead>
+              <tr>
+                <th scope="col" class="admin-row-number">No.</th>
+                <th scope="col">Nama pendaftar</th>
+                <th scope="col">Instansi</th>
+                <th scope="col">Tiket</th>
+                <th scope="col">ID tiket</th>
+                <th scope="col">Waktu check-in</th>
+              </tr>
+            </thead>
+            <tbody id="check-in-rows"></tbody>
           </table>
         </div>
         <div class="admin-pagination" id="pagination" hidden>
@@ -163,6 +180,29 @@
         </div>
         <p class="form-status" id="ticket-status" role="status"></p>
       </section>
+    </dialog>
+    <dialog class="admin-dialog admin-confirm-dialog admin-ticket-confirm" id="ticket-confirm-dialog" aria-labelledby="ticket-confirm-title" aria-describedby="ticket-confirm-description">
+      <div class="admin-ticket-confirm-heading">
+        <span class="admin-ticket-confirm-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18v3a3 3 0 0 0 0 6v3H3v-3a3 3 0 0 0 0-6V6Z" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        </span>
+        <div>
+          <h2 id="ticket-confirm-title"></h2>
+          <p id="ticket-confirm-description"></p>
+        </div>
+      </div>
+      <dl class="admin-ticket-confirm-summary">
+        <div><dt>Email tujuan</dt><dd id="ticket-confirm-email"></dd></div>
+        <div id="ticket-confirm-order"><dt>Jenis tiket</dt><dd id="ticket-confirm-kind"></dd></div>
+        <div id="ticket-confirm-payment"><dt>Nominal QRIS</dt><dd id="ticket-confirm-amount"></dd></div>
+      </dl>
+      <form class="admin-confirm-actions" method="dialog">
+        <button class="back-link" value="cancel" autofocus>Batal</button>
+        <button class="back-link admin-ticket-primary" id="ticket-confirm-submit" value="confirm"></button>
+      </form>
     </dialog>
     <dialog class="admin-dialog" id="check-in-dialog" aria-labelledby="check-in-title">
       <div class="admin-detail-header">

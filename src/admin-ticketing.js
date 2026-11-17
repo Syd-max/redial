@@ -12,7 +12,7 @@ const deliveryLabels = {
   uncertain: "Perlu dicek di Brevo",
 };
 
-export function setupTicketing({ request, reportError, reload, detailDialog }) {
+export function setupTicketing({ request, reportError, reload, onCheckIn, detailDialog }) {
   const byId = (id) => document.getElementById(id);
   const amount = byId("ticket-amount");
   const payment = byId("ticket-payment");
@@ -22,7 +22,17 @@ export function setupTicketing({ request, reportError, reload, detailDialog }) {
   const approve = byId("approve-ticket");
   const received = byId("email-received");
   const notReceived = byId("email-not-received");
+  const confirmDialog = byId("ticket-confirm-dialog");
+  const confirmTitle = byId("ticket-confirm-title");
+  const confirmDescription = byId("ticket-confirm-description");
+  const confirmEmail = byId("ticket-confirm-email");
+  const confirmKind = byId("ticket-confirm-kind");
+  const confirmAmount = byId("ticket-confirm-amount");
+  const confirmOrder = byId("ticket-confirm-order");
+  const confirmPayment = byId("ticket-confirm-payment");
+  const confirmSubmit = byId("ticket-confirm-submit");
   let entry;
+  let confirmation;
   let updating = false;
 
   function showTicketDetails(row) {
@@ -53,15 +63,30 @@ export function setupTicketing({ request, reportError, reload, detailDialog }) {
     approve.disabled = received.disabled = notReceived.disabled = updating;
   }
 
-  async function updateTicket(action, accepted) {
-    if (updating) return;
-    const current = entry;
+  function confirmTicket(action, accepted) {
+    if (updating || confirmDialog.open) return;
     const approving = action === "approve-ticket";
-    const summary = approving
-      ? `${current.jenis_tiket} · ${rupiah.format(ticketPrices[current.jenis_tiket])}\n${current.email}\n\n${current.ticket_approved_at ? "Coba kirim tiket yang sama lagi?" : "Pembayaran sudah sesuai dan tiket siap dikirim?"}`
-      : `${current.email}\n\nKonfirmasi hasil pengecekan log Brevo?`;
-    if (!window.confirm(summary)) return;
+    const retry = Boolean(entry.ticket_approved_at);
+    confirmTitle.textContent = approving
+      ? retry ? "Kirim ulang tiket?" : "Setujui pembayaran?"
+      : "Konfirmasi status email?";
+    confirmDescription.textContent = approving
+      ? retry ? "Tiket yang sama akan dikirim ke alamat di bawah." : "Pastikan nominal transfer sesuai. Tiket akan dikirim ke alamat di bawah."
+      : accepted ? "Catat bahwa Brevo sudah menerima permintaan kirim." : "Catat bahwa Brevo belum menerima email agar tiket bisa dikirim lagi.";
+    confirmSubmit.textContent = approving ? retry ? "Kirim ulang tiket" : "Setujui & Kirim Tiket" : "Simpan status";
+    confirmEmail.textContent = entry.email;
+    confirmOrder.hidden = confirmPayment.hidden = !approving;
+    if (approving) {
+      confirmKind.textContent = entry.jenis_tiket;
+      confirmAmount.textContent = rupiah.format(ticketPrices[entry.jenis_tiket]);
+    }
+    confirmation = { current: entry, action, accepted };
+    confirmDialog.returnValue = "";
+    confirmDialog.showModal();
+  }
 
+  async function updateTicket({ current, action, accepted }) {
+    const approving = action === "approve-ticket";
     updating = true;
     status.textContent = "Memproses tiket…";
     renderTicketDetails();
@@ -74,8 +99,7 @@ export function setupTicketing({ request, reportError, reload, detailDialog }) {
       Object.assign(current, data, { ticket_email_status: data.ticketEmailStatus, emailNeedsReview: false });
       if (detailDialog.open && entry === current) {
         status.textContent = data.message ?? (data.ticketEmailStatus === "accepted"
-          ? "Email tiket diterima oleh Brevo."
-          : "Status email diperbarui. Tiket bisa dikirim lagi.");
+          ? "" : "Status email diperbarui. Tiket bisa dikirim lagi.");
       }
     } catch (error) {
       if (error.ticketEmailStatus === "uncertain") {
@@ -90,9 +114,15 @@ export function setupTicketing({ request, reportError, reload, detailDialog }) {
     }
   }
 
-  approve.addEventListener("click", () => void updateTicket("approve-ticket"));
-  received.addEventListener("click", () => void updateTicket("reconcile-ticket-email", true));
-  notReceived.addEventListener("click", () => void updateTicket("reconcile-ticket-email", false));
+  confirmDialog.addEventListener("close", () => {
+    const selected = confirmation;
+    confirmation = undefined;
+    if (confirmDialog.returnValue === "confirm" && detailDialog.open && selected?.current === entry)
+      void updateTicket(selected);
+  });
+  approve.addEventListener("click", () => confirmTicket("approve-ticket"));
+  received.addEventListener("click", () => confirmTicket("reconcile-ticket-email", true));
+  notReceived.addEventListener("click", () => confirmTicket("reconcile-ticket-email", false));
 
   const dialog = byId("check-in-dialog");
   const form = byId("check-in-form");
@@ -174,7 +204,10 @@ export function setupTicketing({ request, reportError, reload, detailDialog }) {
       const result = await request("PATCH", { body: { action: "check-in-ticket", code: input.value } });
       const label = result.status === "checked_in" ? "Check-in berhasil" : "Tiket sudah check-in";
       scanStatus.textContent = `${label} · ${result.code}`;
-      if (result.status === "checked_in") input.value = "";
+      if (result.status === "checked_in") {
+        input.value = "";
+        onCheckIn();
+      }
     } catch (error) {
       reportError(error, scanStatus);
     } finally {
@@ -185,6 +218,9 @@ export function setupTicketing({ request, reportError, reload, detailDialog }) {
 
   return {
     showTicketDetails,
-    closeCheckIn() { if (dialog.open) dialog.close(); },
+    closeDialogs() {
+      if (confirmDialog.open) confirmDialog.close();
+      if (dialog.open) dialog.close();
+    },
   };
 }

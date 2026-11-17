@@ -192,6 +192,39 @@
   font-size: clamp(1.55rem, 4vw, 2.65rem);
   line-height: 1;
 }
+.admin-list-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 18px;
+}
+.admin-list-nav {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f5ecdd;
+}
+.admin-list-nav button {
+  min-height: 42px;
+  padding-inline: 13px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #614b38;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.admin-list-nav button[aria-pressed="true"] {
+  border-color: #dfc6ad;
+  background: #fffaf1;
+  color: var(--red);
+}
+.admin-list-tools .admin-search {
+  flex: 1 1 280px;
+}
 .admin-search {
   display: flex;
   align-items: center;
@@ -287,8 +320,11 @@
 .admin-table tbody tr:last-child td {
   border-bottom: 0;
 }
-.admin-table td[data-label="Nama"] {
+.admin-table td:is([data-label="Nama"], [data-label="Nama pendaftar"]) {
   font-weight: 600;
+}
+.admin-table td[data-label="ID tiket"] {
+  font-variant-numeric: tabular-nums;
 }
 .admin-row-number {
   font-variant-numeric: tabular-nums;
@@ -380,6 +416,64 @@
 .admin-confirm-actions {
   margin-top: 22px;
 }
+.admin-ticket-confirm {
+  width: min(460px, calc(100% - 28px));
+  border-top: 4px solid var(--red);
+  box-shadow: 0 18px 44px #2e211c29;
+}
+.admin-ticket-confirm::backdrop {
+  background: #2e211c42;
+}
+.admin-ticket-confirm-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+.admin-ticket-confirm-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 12px;
+  background: #f4e5df;
+  color: var(--red);
+}
+.admin-ticket-confirm-icon svg {
+  width: 23px;
+  height: 23px;
+}
+.admin-ticket-confirm-heading p {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.admin-ticket-confirm-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  margin: 17px 0 0;
+  padding: 12px 14px;
+  border: 1px dashed #cfb69b;
+  border-radius: 10px;
+  background: #f7efdf;
+}
+.admin-ticket-confirm-summary div:first-child {
+  grid-column: 1 / -1;
+}
+.admin-ticket-confirm-summary dt {
+  color: #68503c;
+  font-size: 0.78rem;
+}
+.admin-ticket-confirm-summary dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.admin-ticket-confirm .admin-confirm-actions {
+  justify-content: flex-end;
+}
 #delete-description {
   margin-top: 12px;
   overflow-wrap: anywhere;
@@ -432,13 +526,13 @@
 .admin-ticket-panel .admin-note:not(:empty) {
   margin-top: 10px;
 }
-.admin-control.admin-ticket-primary {
+:is(.admin-control, .back-link).admin-ticket-primary {
   border-color: var(--red);
   background: var(--red);
   color: white;
   font-weight: 600;
 }
-.admin-control.admin-ticket-primary:hover:not(:disabled) {
+:is(.admin-control, .back-link).admin-ticket-primary:hover:not(:disabled) {
   filter: brightness(0.94);
 }
 .admin-ticket-preview {

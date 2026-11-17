@@ -58,6 +58,9 @@ export function getRegistrationStore() {
     request(query, options) {
       return rest("redial_pendaftaran?" + query, options);
     },
+    requestTickets(query) {
+      return rest("redial_tiket?" + query);
+    },
     async rpc(name, body) {
       const response = await rest("rpc/" + name, {
         method: "POST",

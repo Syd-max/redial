@@ -32,6 +32,10 @@ const logoutStatus = document.querySelector("#logout-status");
 const refresh = document.querySelector("#refresh");
 const table = document.querySelector("#table-wrap");
 const rows = document.querySelector("#registration-rows");
+const checkedInRows = document.querySelector("#check-in-rows");
+const registrationTable = document.querySelector("#registration-table");
+const checkInTable = document.querySelector("#check-in-table");
+const viewButtons = document.querySelectorAll("[data-admin-view]");
 const pagination = document.querySelector("#pagination");
 const previous = document.querySelector("#previous");
 const next = document.querySelector("#next");
@@ -45,9 +49,14 @@ const dateFormat = new Intl.DateTimeFormat("id-ID", {
 
 let page = 1;
 let search = "";
+let view = "registrations";
 let reading;
 let pendingDelete;
-const ticketing = setupTicketing({ request, reportError, reload: () => loadRows(page, search, true), detailDialog });
+const ticketing = setupTicketing({
+  request, reportError, detailDialog,
+  reload: () => loadRows(page, search, true),
+  onCheckIn() { if (view === "check-ins") void loadRows(1, search); },
+});
 
 async function request(method, { body, query, signal } = {}) {
   const response = await fetch("/api/admin" + (query ? "?" + query : ""), {
@@ -66,8 +75,8 @@ async function request(method, { body, query, signal } = {}) {
 
 function showLogin(message = "") {
   reading?.abort();
+  ticketing.closeDialogs();
   if (detailDialog.open) detailDialog.close();
-  ticketing.closeCheckIn();
   if (deleteDialog.open) deleteDialog.close();
   if (logoutDialog.open) logoutDialog.close();
   startup.hidden = true;
@@ -76,6 +85,7 @@ function showLogin(message = "") {
   dashboardTools.hidden = true;
   logout.hidden = true;
   rows.replaceChildren();
+  checkedInRows.replaceChildren();
   loginStatus.textContent = message;
 }
 
@@ -158,21 +168,27 @@ function showDetail(entry) {
 
 function renderRows(data, offset) {
   const content = document.createDocumentFragment();
+  const listingCheckIns = view === "check-ins";
   for (const [index, entry] of data.entries()) {
     const row = document.createElement("tr");
     const number = row.insertCell();
     number.className = "admin-row-number";
     number.dataset.label = "No.";
     number.textContent = String(offset + index + 1);
-    for (const [label, value] of [
-      ["Nama", entry.nama],
-      ["Instansi", entry.instansi],
-      ["Waktu daftar", registrationTime(entry)],
-    ]) {
+    const fields = listingCheckIns ? [
+      ["Nama pendaftar", entry.redial_pendaftaran.nama],
+      ["Instansi", entry.redial_pendaftaran.instansi],
+      ["Tiket", entry.redial_pendaftaran.jenis_tiket === "DUO" ? `DUO (${entry.position}/2)` : entry.redial_pendaftaran.jenis_tiket],
+      ["ID tiket", entry.code],
+      ["Waktu check-in", dateFormat.format(new Date(entry.checked_in_at)) + " WIB"],
+    ] : [["Nama", entry.nama], ["Instansi", entry.instansi], ["Waktu daftar", registrationTime(entry)]];
+    for (const [label, value] of fields) {
       const cell = row.insertCell();
       cell.dataset.label = label;
       cell.textContent = value;
     }
+    content.append(row);
+    if (listingCheckIns) continue;
     const action = row.insertCell();
     action.className = "admin-row-detail";
     const detail = document.createElement("button");
@@ -197,9 +213,20 @@ function renderRows(data, offset) {
     actions.className = "admin-row-actions";
     actions.append(detail, remove);
     action.append(actions);
-    content.append(row);
   }
-  rows.replaceChildren(content);
+  (listingCheckIns ? checkedInRows : rows).replaceChildren(content);
+  checkInTable.hidden = !listingCheckIns;
+  registrationTable.hidden = listingCheckIns;
+}
+
+function selectView(nextView) {
+  view = nextView;
+  page = 1;
+  table.hidden = true;
+  pagination.hidden = true;
+  for (const button of viewButtons) {
+    button.setAttribute("aria-pressed", String(button.dataset.adminView === view));
+  }
 }
 
 async function loadRows(nextPage = page, nextSearch = search, silent = false) {
@@ -207,17 +234,18 @@ async function loadRows(nextPage = page, nextSearch = search, silent = false) {
   const controller = new AbortController();
   reading = controller;
   if (!silent && !dashboard.hidden)
-    dashboardStatus.textContent = "Memuat pendaftaran…";
+    dashboardStatus.textContent = view === "check-ins" ? "Memuat data check-in…" : "Memuat pendaftaran…";
 
   try {
     const query = new URLSearchParams({
       page: String(nextPage),
       q: nextSearch,
+      view,
     });
     const data = await request("GET", { query, signal: controller.signal });
     if (controller.signal.aborted) return;
     if (!data.rows.length && nextPage > 1)
-      return loadRows(nextPage - 1, nextSearch);
+      return loadRows(nextPage - 1, nextSearch, silent);
     showDashboard();
     page = nextPage;
     search = nextSearch;
@@ -227,11 +255,13 @@ async function loadRows(nextPage = page, nextSearch = search, silent = false) {
     pageNumber.textContent = "Halaman " + page;
     previous.disabled = page <= 1;
     next.disabled = !data.hasNext;
-    dashboardStatus.textContent = data.rows.length
-      ? ""
-      : search
-        ? "Pendaftaran yang cocok belum ditemukan."
-        : "Belum ada pendaftaran.";
+    if (data.rows.length) dashboardStatus.textContent = "";
+    else if (view === "check-ins") dashboardStatus.textContent = search
+      ? "Belum ada tiket yang sudah check-in untuk pencarian ini."
+      : "Belum ada tiket yang sudah check-in.";
+    else dashboardStatus.textContent = search
+      ? "Pendaftaran yang cocok belum ditemukan."
+      : "Belum ada pendaftaran.";
   } catch (error) {
     if (controller.signal.aborted) return;
     if (dashboard.hidden)
@@ -260,6 +290,7 @@ loginForm.addEventListener("submit", async (event) => {
     });
     loginForm.reset();
     searchForm.reset();
+    selectView("registrations");
     showDashboard();
     await loadRows(1, "");
   } catch (error) {
@@ -273,6 +304,13 @@ searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   void loadRows(1, searchForm.elements.search.value.trim());
 });
+for (const button of viewButtons) {
+  button.addEventListener("click", () => {
+    if (button.dataset.adminView === view) return;
+    selectView(button.dataset.adminView);
+    void loadRows(1, search);
+  });
+}
 refresh.addEventListener("click", () => void loadRows());
 previous.addEventListener("click", () => void loadRows(page - 1));
 next.addEventListener("click", () => void loadRows(page + 1));
