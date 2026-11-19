@@ -2750,6 +2750,18 @@ video {
 .sponsor-guide li + li {
   margin-top: 5px;
 }
+.ticket-benefits-title {
+  margin: 12px 14px 0;
+  font: 600 0.84rem/1.5 "DM Sans", sans-serif;
+}
+.ticket-benefits-note {
+  margin: 0 14px 14px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-style: italic;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
 
 .payment-card {
   padding: clamp(16px, 4vw, 26px) 14px;
